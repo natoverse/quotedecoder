@@ -81,14 +81,88 @@ body {
   content: "\2014\00a0";
 }
 
-.encoded-text {
-  margin: 1.25rem 0 0;
-  font-family: "Courier New", Courier, monospace;
-  font-size: clamp(0.85rem, 3vw, 1rem);
+.decoder-hint {
+  margin: 0 0 0.9rem;
   color: var(--muted);
-  word-break: break-word;
-  letter-spacing: 0.05em;
-  line-height: 1.7;
+  text-align: center;
+}
+
+.decoder-grid {
+  margin: 1rem 0 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 0.25rem;
+  font-family: "Courier New", Courier, monospace;
+}
+
+.decoder-cell {
+  min-width: 1.45rem;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.15rem;
+}
+
+.decoder-fill {
+  width: 1.45rem;
+  height: 1.55rem;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 0.25rem;
+  background: rgba(255, 255, 255, 0.07);
+  color: var(--fg);
+  font: inherit;
+  font-size: 0.95rem;
+  cursor: pointer;
+  text-transform: uppercase;
+}
+
+.decoder-fill[data-selected="true"] {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent);
+}
+
+.decoder-encoded {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.decoder-space {
+  min-width: 1.2rem;
+  border: 0;
+  background: transparent;
+  cursor: default;
+}
+
+.keyboard {
+  margin-top: 1.25rem;
+  display: grid;
+  grid-template-columns: repeat(9, minmax(0, 1fr));
+  gap: 0.35rem;
+}
+
+.keyboard-key {
+  min-height: 2.25rem;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 0.45rem;
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--fg);
+  font: inherit;
+  font-size: 0.95rem;
+  cursor: pointer;
+}
+
+.keyboard-key:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.keyboard-key[data-selected="true"] {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent);
+}
+
+.keyboard-clear {
+  grid-column: span 2;
 }
 
 .next {
