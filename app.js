@@ -1,10 +1,13 @@
 /**
- * Quote Decoder — phase 1: read-only quote display.
+ * Quote Decoder — phase 2: read-only quote display with Caesar cipher encoding.
  *
  * On each visit we pick a random bucket from quotes/all/ (1..N_BUCKETS), then a
  * random quote inside it. To avoid repeats we remember which buckets were shown
  * in a cookie for 30 days; because buckets are randomly shuffled, never
  * repeating a bucket within the window guarantees we never repeat a quote.
+ *
+ * Each quote is also encoded with a randomly generated substitution cipher
+ * (a derangement of the alphabet: every letter maps to a different letter).
  */
 (function () {
   "use strict";
@@ -18,6 +21,7 @@
   var quoteEl = document.getElementById("quote");
   var quoteTextEl = document.getElementById("quote-text");
   var quoteAuthorEl = document.getElementById("quote-author");
+  var encodedTextEl = document.getElementById("encoded-text");
   var nextEl = document.getElementById("next");
 
   function readCookie(name) {
@@ -81,6 +85,34 @@
     return available[Math.floor(Math.random() * available.length)];
   }
 
+  // Build a random substitution cipher where no letter maps to itself.
+  // Uses Sattolo's algorithm to produce a single-cycle permutation (always a derangement).
+  function generateCipher() {
+    var alpha = "abcdefghijklmnopqrstuvwxyz";
+    var perm = [], i, j, tmp;
+    for (i = 0; i < 26; i++) perm[i] = i;
+    for (i = 25; i > 0; i--) {
+      j = Math.floor(Math.random() * i); // [0, i-1] ensures no fixed points
+      tmp = perm[i]; perm[i] = perm[j]; perm[j] = tmp;
+    }
+    var map = {};
+    for (i = 0; i < 26; i++) {
+      map[alpha[i]] = alpha[perm[i]];
+      map[alpha[i].toUpperCase()] = alpha[perm[i]].toUpperCase();
+    }
+    return map;
+  }
+
+  // Apply a substitution cipher to text, preserving non-letter characters.
+  function encodeText(text, cipher) {
+    var result = "", i, ch;
+    for (i = 0; i < text.length; i++) {
+      ch = text[i];
+      result += Object.prototype.hasOwnProperty.call(cipher, ch) ? cipher[ch] : ch;
+    }
+    return result;
+  }
+
   function showError(message) {
     statusEl.textContent = message;
     statusEl.hidden = false;
@@ -88,9 +120,11 @@
   }
 
   function showQuote(quote) {
+    var cipher = generateCipher();
     quoteTextEl.textContent = quote.quote;
     quoteAuthorEl.textContent = quote.author || "Unknown";
     quoteAuthorEl.hidden = !quote.author;
+    encodedTextEl.textContent = encodeText(quote.quote, cipher);
     statusEl.hidden = true;
     quoteEl.hidden = false;
     nextEl.hidden = false;
