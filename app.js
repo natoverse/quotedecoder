@@ -174,10 +174,23 @@
   }
 
   function renderDecoderGrid() {
-    var i, ch, cipherLetter, cell, fill, encoded;
+    var i, ch, cipherLetter, cell, fill, encoded, wordGroup;
     encodedTextEl.textContent = "";
+    wordGroup = null;
     for (i = 0; i < currentEncodedText.length; i++) {
       ch = currentEncodedText[i];
+
+      if (ch === " ") {
+        wordGroup = null;
+        continue;
+      }
+
+      if (!wordGroup) {
+        wordGroup = document.createElement("div");
+        wordGroup.className = "decoder-word";
+        encodedTextEl.appendChild(wordGroup);
+      }
+
       cell = document.createElement("div");
       cell.className = "decoder-cell";
 
@@ -209,12 +222,12 @@
         fill.disabled = true;
         fill.className += " decoder-space";
         fill.textContent = "";
-        encoded.textContent = ch === " " ? "\u00a0" : ch;
+        encoded.textContent = ch;
       }
 
       cell.appendChild(fill);
       cell.appendChild(encoded);
-      encodedTextEl.appendChild(cell);
+      wordGroup.appendChild(cell);
     }
   }
 
@@ -267,6 +280,8 @@
     updateKeyboardState();
     statusEl.hidden = true;
     quoteEl.hidden = false;
+    keyboardEl.hidden = false;
+    document.body.classList.add("has-keyboard");
     nextEl.hidden = false;
   }
 
@@ -274,6 +289,8 @@
     statusEl.textContent = "Loading a quote\u2026";
     statusEl.hidden = false;
     quoteEl.hidden = true;
+    keyboardEl.hidden = true;
+    document.body.classList.remove("has-keyboard");
     nextEl.hidden = true;
 
     var now = Date.now();
