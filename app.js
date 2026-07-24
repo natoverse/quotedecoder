@@ -19,10 +19,13 @@
 
   var statusEl = document.getElementById("status");
   var quoteEl = document.getElementById("quote");
-  var quoteTextEl = document.getElementById("quote-text");
-  var quoteAuthorEl = document.getElementById("quote-author");
+  var decoderHintEl = document.getElementById("decoder-hint");
   var encodedTextEl = document.getElementById("encoded-text");
+  var keyboardEl = document.getElementById("keyboard");
   var nextEl = document.getElementById("next");
+  var currentEncodedText = "";
+  var selectedCipherLetter = null;
+  var assignments = {};
 
   function readCookie(name) {
     var prefix = name + "=";
@@ -119,12 +122,149 @@
     nextEl.hidden = false;
   }
 
+  function isAsciiLetter(ch) {
+    return /[A-Za-z]/.test(ch);
+  }
+
+  function usedPlainLetters(exceptCipher) {
+    var used = {};
+    var cipher;
+    for (cipher in assignments) {
+      if (
+        Object.prototype.hasOwnProperty.call(assignments, cipher) &&
+        cipher !== exceptCipher
+      ) {
+        used[assignments[cipher]] = true;
+      }
+    }
+    return used;
+  }
+
+  function updateHint() {
+    if (!selectedCipherLetter) {
+      decoderHintEl.textContent = "Tap a letter, then pick a replacement.";
+      return;
+    }
+    decoderHintEl.textContent =
+      "Selected " + selectedCipherLetter + ". Choose a letter or tap X to clear.";
+  }
+
+  function updateKeyboardState() {
+    var used = usedPlainLetters(selectedCipherLetter);
+    var selectedPlain = selectedCipherLetter
+      ? assignments[selectedCipherLetter] || null
+      : null;
+    var buttons = keyboardEl.querySelectorAll(".keyboard-key");
+    var i, button, letter, isClear;
+    for (i = 0; i < buttons.length; i++) {
+      button = buttons[i];
+      isClear = button.getAttribute("data-action") === "clear";
+      if (isClear) {
+        button.disabled = !(selectedCipherLetter && selectedPlain);
+        continue;
+      }
+      letter = button.getAttribute("data-letter");
+      button.setAttribute(
+        "data-selected",
+        selectedPlain && selectedPlain === letter ? "true" : "false"
+      );
+      button.disabled =
+        !selectedCipherLetter || (used[letter] && selectedPlain !== letter);
+    }
+  }
+
+  function renderDecoderGrid() {
+    var i, ch, cipherLetter, cell, fill, encoded;
+    encodedTextEl.textContent = "";
+    for (i = 0; i < currentEncodedText.length; i++) {
+      ch = currentEncodedText[i];
+      cell = document.createElement("div");
+      cell.className = "decoder-cell";
+
+      fill = document.createElement("button");
+      fill.type = "button";
+      fill.className = "decoder-fill";
+
+      encoded = document.createElement("span");
+      encoded.className = "decoder-encoded";
+
+      if (isAsciiLetter(ch)) {
+        cipherLetter = ch.toUpperCase();
+        fill.textContent = assignments[cipherLetter] || "";
+        fill.setAttribute(
+          "data-selected",
+          selectedCipherLetter === cipherLetter ? "true" : "false"
+        );
+        fill.setAttribute("aria-label", "Set letter for " + cipherLetter);
+        encoded.textContent = cipherLetter;
+        fill.addEventListener("click", (function (letter) {
+          return function () {
+            selectedCipherLetter = letter;
+            updateHint();
+            renderDecoderGrid();
+            updateKeyboardState();
+          };
+        })(cipherLetter));
+      } else {
+        fill.disabled = true;
+        fill.className += " decoder-space";
+        fill.textContent = "";
+        encoded.textContent = ch === " " ? "\u00a0" : ch;
+      }
+
+      cell.appendChild(fill);
+      cell.appendChild(encoded);
+      encodedTextEl.appendChild(cell);
+    }
+  }
+
+  function createKeyboard() {
+    var letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    var i, letter, button;
+    keyboardEl.textContent = "";
+    for (i = 0; i < letters.length; i++) {
+      letter = letters[i];
+      button = document.createElement("button");
+      button.type = "button";
+      button.className = "keyboard-key";
+      button.setAttribute("data-letter", letter);
+      button.textContent = letter;
+      button.addEventListener("click", (function (plainLetter) {
+        return function () {
+          if (!selectedCipherLetter) return;
+          assignments[selectedCipherLetter] = plainLetter;
+          updateHint();
+          renderDecoderGrid();
+          updateKeyboardState();
+        };
+      })(letter));
+      keyboardEl.appendChild(button);
+    }
+
+    button = document.createElement("button");
+    button.type = "button";
+    button.className = "keyboard-key keyboard-clear";
+    button.setAttribute("data-action", "clear");
+    button.setAttribute("aria-label", "Clear selected letter");
+    button.textContent = "X";
+    button.addEventListener("click", function () {
+      if (!selectedCipherLetter) return;
+      delete assignments[selectedCipherLetter];
+      updateHint();
+      renderDecoderGrid();
+      updateKeyboardState();
+    });
+    keyboardEl.appendChild(button);
+  }
+
   function showQuote(quote) {
     var cipher = generateCipher();
-    quoteTextEl.textContent = quote.quote;
-    quoteAuthorEl.textContent = quote.author || "Unknown";
-    quoteAuthorEl.hidden = !quote.author;
-    encodedTextEl.textContent = encodeText(quote.quote, cipher);
+    currentEncodedText = encodeText(quote.quote, cipher);
+    selectedCipherLetter = null;
+    assignments = {};
+    renderDecoderGrid();
+    updateHint();
+    updateKeyboardState();
     statusEl.hidden = true;
     quoteEl.hidden = false;
     nextEl.hidden = false;
@@ -163,5 +303,6 @@
   }
 
   nextEl.addEventListener("click", loadQuote);
+  createKeyboard();
   loadQuote();
 })();
