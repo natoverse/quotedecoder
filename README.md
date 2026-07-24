@@ -17,6 +17,14 @@ Quotes live in `quotes/`, served straight from GitHub (no backend/query layer):
 
 Each quote is `{ "quote", "author", "tags": [...] }`.
 
+## Web app
+
+`index.html` (with `styles.css` and `app.js`) is a static, mobile-friendly page
+that picks a random bucket from `quotes/all/`, then a random quote in it, and
+displays it. A 30-day cookie of seen bucket IDs avoids repeats within that
+window. The `.github/workflows/deploy-pages.yml` workflow publishes the site to
+GitHub Pages on every push to `main`.
+
 ## Scripts
 
 `scripts/` regenerates the data from the tagged master:
