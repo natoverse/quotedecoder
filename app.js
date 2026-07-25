@@ -36,6 +36,7 @@
   var puzzleCipherLetters = [];
   var puzzleCipherLetterIndex = {};
   var selectedCipherLetter = null;
+  var selectedTextPos = -1;
   var assignments = {};
   var currentCipherInverse = {};
   var currentQuote = null;
@@ -210,35 +211,32 @@
   }
 
   // After an assignment, advance selectedCipherLetter to the next cipher letter
-  // in the encoded text that has no assignment yet.
+  // to the right of the current text position that has no assignment yet.
   function advanceSelection() {
-    var len = puzzleCipherLetters.length;
+    var len = currentEncodedText.length;
     if (!len) return;
 
-    // Find the starting search position in unique cipher-letter order.
-    var startPos = 0;
-    var i, cipherLetter;
-    if (
-      selectedCipherLetter &&
-      Object.prototype.hasOwnProperty.call(
-        puzzleCipherLetterIndex,
-        selectedCipherLetter
-      )
-    ) {
-      startPos = puzzleCipherLetterIndex[selectedCipherLetter] + 1;
-    }
+    // Start scanning one position to the right of the current text cursor.
+    var startPos = selectedTextPos >= 0 ? selectedTextPos + 1 : 0;
 
     // Scan forward from startPos (wrapping) for the next unfilled cipher letter.
+    var i, pos, ch, cipherLetter;
     for (i = 0; i < len; i++) {
-      cipherLetter = puzzleCipherLetters[(startPos + i) % len];
-      if (!assignments[cipherLetter]) {
-        selectedCipherLetter = cipherLetter;
-        return;
+      pos = (startPos + i) % len;
+      ch = currentEncodedText[pos];
+      if (isAsciiLetter(ch)) {
+        cipherLetter = ch.toUpperCase();
+        if (!assignments[cipherLetter]) {
+          selectedCipherLetter = cipherLetter;
+          selectedTextPos = pos;
+          return;
+        }
       }
     }
 
     // All cipher letters are filled.
     selectedCipherLetter = null;
+    selectedTextPos = -1;
   }
 
   function updateHintButton() {
@@ -318,13 +316,14 @@
         );
         fill.setAttribute("aria-label", "Set letter for " + cipherLetter);
         encoded.textContent = cipherLetter;
-        fill.addEventListener("click", (function (letter) {
+        fill.addEventListener("click", (function (letter, pos) {
           return function () {
             selectedCipherLetter = letter;
+            selectedTextPos = pos;
             renderDecoderGrid();
             updateKeyboardState();
           };
-        })(cipherLetter));
+        })(cipherLetter, i));
       } else {
         fill.disabled = true;
         fill.className += " decoder-space";
@@ -392,6 +391,7 @@
     currentEncodedText = encodeText(quote.quote, cipher);
     setPuzzleCipherLetters(currentEncodedText);
     selectedCipherLetter = null;
+    selectedTextPos = -1;
     assignments = {};
     renderDecoderGrid();
     updateKeyboardState();
