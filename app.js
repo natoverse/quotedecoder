@@ -33,6 +33,8 @@
   var solvedAuthorEl = document.getElementById("solved-author");
   var solvedCloseEl = document.getElementById("solved-close");
   var currentEncodedText = "";
+  var puzzleCipherLetters = [];
+  var puzzleCipherLetterIndex = {};
   var selectedCipherLetter = null;
   var assignments = {};
   var currentCipherInverse = {};
@@ -166,6 +168,33 @@
     return /[A-Za-z]/.test(ch);
   }
 
+  function buildPuzzleCipherLetters(text) {
+    var seen = {};
+    var letters = [];
+    var i, ch, cipherLetter;
+    for (i = 0; i < text.length; i++) {
+      ch = text[i];
+      if (isAsciiLetter(ch)) {
+        cipherLetter = ch.toUpperCase();
+        if (!seen[cipherLetter]) {
+          seen[cipherLetter] = true;
+          letters.push(cipherLetter);
+        }
+      }
+    }
+    return letters;
+  }
+
+  function setPuzzleCipherLetters(text) {
+    var i, letter;
+    puzzleCipherLetters = buildPuzzleCipherLetters(text);
+    puzzleCipherLetterIndex = {};
+    for (i = 0; i < puzzleCipherLetters.length; i++) {
+      letter = puzzleCipherLetters[i];
+      puzzleCipherLetterIndex[letter] = i;
+    }
+  }
+
   function usedPlainLetters(exceptCipher) {
     var used = {};
     var cipher;
@@ -183,33 +212,28 @@
   // After an assignment, advance selectedCipherLetter to the next cipher letter
   // in the encoded text that has no assignment yet.
   function advanceSelection() {
-    var len = currentEncodedText.length;
+    var len = puzzleCipherLetters.length;
     if (!len) return;
 
-    // Find the starting search position: just after the first occurrence of the
-    // currently-selected cipher letter.
+    // Find the starting search position in unique cipher-letter order.
     var startPos = 0;
-    var i, ch, cipherLetter;
-    if (selectedCipherLetter) {
-      for (i = 0; i < len; i++) {
-        if (isAsciiLetter(currentEncodedText[i]) &&
-            currentEncodedText[i].toUpperCase() === selectedCipherLetter) {
-          startPos = i + 1;
-          break;
-        }
-      }
+    var i, cipherLetter;
+    if (
+      selectedCipherLetter &&
+      Object.prototype.hasOwnProperty.call(
+        puzzleCipherLetterIndex,
+        selectedCipherLetter
+      )
+    ) {
+      startPos = puzzleCipherLetterIndex[selectedCipherLetter] + 1;
     }
 
     // Scan forward from startPos (wrapping) for the next unfilled cipher letter.
     for (i = 0; i < len; i++) {
-      var pos = (startPos + i) % len;
-      ch = currentEncodedText[pos];
-      if (isAsciiLetter(ch)) {
-        cipherLetter = ch.toUpperCase();
-        if (!assignments[cipherLetter]) {
-          selectedCipherLetter = cipherLetter;
-          return;
-        }
+      cipherLetter = puzzleCipherLetters[(startPos + i) % len];
+      if (!assignments[cipherLetter]) {
+        selectedCipherLetter = cipherLetter;
+        return;
       }
     }
 
@@ -218,10 +242,10 @@
   }
 
   function updateHintButton() {
-    var i, ch;
-    for (i = 0; i < currentEncodedText.length; i++) {
-      ch = currentEncodedText[i];
-      if (isAsciiLetter(ch) && !assignments[ch.toUpperCase()]) {
+    var i, cipherLetter;
+    for (i = 0; i < puzzleCipherLetters.length; i++) {
+      cipherLetter = puzzleCipherLetters[i];
+      if (!assignments[cipherLetter]) {
         hintEl.disabled = false;
         return;
       }
@@ -366,6 +390,7 @@
     var cipher = generateCipher();
     currentCipherInverse = buildCipherInverse(cipher);
     currentEncodedText = encodeText(quote.quote, cipher);
+    setPuzzleCipherLetters(currentEncodedText);
     selectedCipherLetter = null;
     assignments = {};
     renderDecoderGrid();
@@ -417,16 +442,11 @@
 
   hintEl.addEventListener("click", function () {
     var candidates = [];
-    var seen = {};
-    var i, ch, cipherLetter;
-    for (i = 0; i < currentEncodedText.length; i++) {
-      ch = currentEncodedText[i];
-      if (isAsciiLetter(ch)) {
-        cipherLetter = ch.toUpperCase();
-        if (!assignments[cipherLetter] && !seen[cipherLetter]) {
-          candidates.push(cipherLetter);
-          seen[cipherLetter] = true;
-        }
+    var i, cipherLetter;
+    for (i = 0; i < puzzleCipherLetters.length; i++) {
+      cipherLetter = puzzleCipherLetters[i];
+      if (!assignments[cipherLetter]) {
+        candidates.push(cipherLetter);
       }
     }
     if (candidates.length === 0) return;
@@ -439,14 +459,11 @@
   });
 
   function checkSolved() {
-    var i, ch, cipherLetter;
-    for (i = 0; i < currentEncodedText.length; i++) {
-      ch = currentEncodedText[i];
-      if (isAsciiLetter(ch)) {
-        cipherLetter = ch.toUpperCase();
-        if (assignments[cipherLetter] !== currentCipherInverse[cipherLetter]) {
-          return;
-        }
+    var i, cipherLetter;
+    for (i = 0; i < puzzleCipherLetters.length; i++) {
+      cipherLetter = puzzleCipherLetters[i];
+      if (assignments[cipherLetter] !== currentCipherInverse[cipherLetter]) {
+        return;
       }
     }
     openSolvedPanel();
