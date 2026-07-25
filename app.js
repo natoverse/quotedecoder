@@ -247,7 +247,7 @@
     button.className = "keyboard-key keyboard-clear";
     button.setAttribute("data-action", "clear");
     button.setAttribute("aria-label", "Clear selected letter");
-    button.textContent = "X";
+    button.textContent = "\u2715";
     button.addEventListener("click", function () {
       if (!selectedCipherLetter) return;
       delete assignments[selectedCipherLetter];
