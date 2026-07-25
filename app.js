@@ -278,43 +278,49 @@
   }
 
   function createKeyboard() {
-    var letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-    var i, letter, button;
+    var rows = ["QWERTYUIOP", "ASDFGHJKL", "ZXCVBNM"];
+    var i, j, letter, button, rowEl;
     keyboardEl.textContent = "";
-    for (i = 0; i < letters.length; i++) {
-      letter = letters[i];
-      button = document.createElement("button");
-      button.type = "button";
-      button.className = "keyboard-key";
-      button.setAttribute("data-letter", letter);
-      button.textContent = letter;
-      button.addEventListener("click", (function (plainLetter) {
-        return function () {
+    for (i = 0; i < rows.length; i++) {
+      rowEl = document.createElement("div");
+      rowEl.className = "keyboard-row";
+      for (j = 0; j < rows[i].length; j++) {
+        letter = rows[i][j];
+        button = document.createElement("button");
+        button.type = "button";
+        button.className = "keyboard-key";
+        button.setAttribute("data-letter", letter);
+        button.textContent = letter;
+        button.addEventListener("click", (function (plainLetter) {
+          return function () {
+            if (!selectedCipherLetter) return;
+            assignments[selectedCipherLetter] = plainLetter;
+            renderDecoderGrid();
+            updateKeyboardState();
+            updateHintButton();
+            checkSolved();
+          };
+        })(letter));
+        rowEl.appendChild(button);
+      }
+      if (i === rows.length - 1) {
+        button = document.createElement("button");
+        button.type = "button";
+        button.className = "keyboard-key keyboard-clear";
+        button.setAttribute("data-action", "clear");
+        button.setAttribute("aria-label", "Clear selected letter");
+        button.textContent = "\u2715";
+        button.addEventListener("click", function () {
           if (!selectedCipherLetter) return;
-          assignments[selectedCipherLetter] = plainLetter;
+          delete assignments[selectedCipherLetter];
           renderDecoderGrid();
           updateKeyboardState();
           updateHintButton();
-          checkSolved();
-        };
-      })(letter));
-      keyboardEl.appendChild(button);
+        });
+        rowEl.appendChild(button);
+      }
+      keyboardEl.appendChild(rowEl);
     }
-
-    button = document.createElement("button");
-    button.type = "button";
-    button.className = "keyboard-key keyboard-clear";
-    button.setAttribute("data-action", "clear");
-    button.setAttribute("aria-label", "Clear selected letter");
-    button.textContent = "\u2715";
-    button.addEventListener("click", function () {
-      if (!selectedCipherLetter) return;
-      delete assignments[selectedCipherLetter];
-      renderDecoderGrid();
-      updateKeyboardState();
-      updateHintButton();
-    });
-    keyboardEl.appendChild(button);
   }
 
   function showQuote(quote) {
