@@ -277,8 +277,8 @@ body::before {
   bottom: 0;
   left: 0;
   right: 0;
-  display: grid;
-  grid-template-columns: repeat(9, minmax(0, 1fr));
+  display: flex;
+  flex-direction: column;
   gap: 0.35rem;
   padding: 0.75rem
     max(1rem, env(safe-area-inset-right))
@@ -290,7 +290,13 @@ body::before {
   z-index: 100;
 }
 
+.keyboard-row {
+  display: flex;
+  gap: 0.35rem;
+}
+
 .keyboard-key {
+  flex: 1;
   min-height: 2.25rem;
   border: 1px solid rgba(239, 226, 194, 0.28);
   border-radius: 0.2rem;
@@ -311,10 +317,43 @@ body::before {
   box-shadow: 0 0 0 1px var(--accent), 0 0 12px rgba(183, 38, 31, 0.4);
 }
 
-.next {
+.btn-hint {
   display: block;
   width: 100%;
   margin-top: 2rem;
+  padding: 0.9rem 1rem;
+  min-height: 3rem;
+  font: inherit;
+  font-size: 1.05rem;
+  color: #f9ebcf;
+  background: rgba(68, 41, 32, 0.66);
+  border: 1px solid var(--accent);
+  border-radius: 0.2rem;
+  cursor: pointer;
+  touch-action: manipulation;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.btn-hint:hover,
+.btn-hint:focus-visible {
+  background: rgba(183, 38, 31, 0.2);
+  box-shadow: 0 0 0 1px var(--accent), 0 0 12px rgba(183, 38, 31, 0.4);
+}
+
+.btn-hint:active {
+  transform: translateY(1px);
+}
+
+.btn-hint:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.next {
+  display: block;
+  width: 100%;
+  margin-top: 0.75rem;
   padding: 0.9rem 1rem;
   min-height: 3rem;
   font: inherit;
