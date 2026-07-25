@@ -303,3 +303,24 @@ body {
 body.has-keyboard {
   padding-bottom: max(13rem, calc(11rem + env(safe-area-inset-bottom)));
 }
+
+.site-footer {
+  position: fixed;
+  bottom: 0.75rem;
+  right: 1rem;
+  z-index: 50;
+}
+
+.github-link {
+  color: var(--muted);
+  font-family: "Georgia", "Times New Roman", serif;
+  font-size: 0.8rem;
+  text-decoration: none;
+  opacity: 0.6;
+}
+
+.github-link:hover,
+.github-link:focus-visible {
+  color: var(--accent);
+  opacity: 1;
+}
