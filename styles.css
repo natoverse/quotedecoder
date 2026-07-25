@@ -1,6 +1,6 @@
 :root {
   color-scheme: dark;
-  --bg: #050d07;
+  --bg: #000;
   --bg-accent: #0a1810;
   --fg: #b4f0b4;
   --muted: #4daa6b;
@@ -26,99 +26,29 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding:
-    max(0.4rem, env(safe-area-inset-top))
-    max(0.1rem, env(safe-area-inset-right))
-    max(0.4rem, env(safe-area-inset-bottom))
-    max(0.1rem, env(safe-area-inset-left));
-  background:
-    radial-gradient(circle at 18% 22%, rgba(67, 86, 61, 0.16) 0 1px, transparent 2px),
-    radial-gradient(circle at 72% 63%, rgba(0, 0, 0, 0.55) 0 2px, transparent 3px),
-    radial-gradient(ellipse at top, rgba(0, 255, 65, 0.055), transparent 48%),
-    radial-gradient(ellipse at bottom right, rgba(0, 229, 255, 0.035), transparent 52%),
-    linear-gradient(115deg, transparent 25%, rgba(72, 86, 68, 0.045) 25% 26%, transparent 26% 74%, rgba(0, 0, 0, 0.16) 74% 75%, transparent 75%),
-    var(--bg);
-  background-size: 7px 7px, 13px 13px, auto, auto, 180px 180px, auto;
+  background: #000;
   color: var(--fg);
   font-family: "Courier New", "Lucida Console", Monaco, monospace;
   line-height: 1.5;
   -webkit-text-size-adjust: 100%;
 }
 
-body::before,
-body::after {
-  content: "";
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-}
-
-body::before {
-  background:
-    repeating-linear-gradient(
-      0deg,
-      rgba(0, 255, 65, 0.018) 0,
-      rgba(0, 255, 65, 0.018) 1px,
-      transparent 1px,
-      transparent 4px
-    ),
-    repeating-linear-gradient(
-      97deg,
-      transparent 0 41px,
-      rgba(255, 255, 255, 0.012) 42px,
-      transparent 43px 89px
-    );
-}
-
-body::after {
-  background:
-    radial-gradient(circle at 12% 30%, transparent 0 18%, rgba(0, 0, 0, 0.2) 55%, rgba(0, 0, 0, 0.48) 100%),
-    repeating-radial-gradient(circle at 80% 20%, transparent 0 4px, rgba(0, 0, 0, 0.045) 5px 6px);
-  mix-blend-mode: multiply;
-}
-
 .card {
   position: relative;
   width: 100%;
   max-width: 64rem;
-  background: rgba(5, 18, 10, 0.88);
+  background: #000;
   border: 0;
   border-radius: 0;
-  padding: clamp(0.3rem, 1vw, 0.65rem);
+  padding: 0;
   box-shadow:
     0 1rem 2.5rem rgba(0, 0, 0, 0.65),
     inset 0 0 3rem rgba(0, 0, 0, 0.2);
 }
 
-.title-bar {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-  margin: 0 0 1rem;
-}
-
-.title {
-  margin: 0;
-  width: min(100%, 52rem);
-  height: clamp(5rem, 19vw, 10rem);
-  overflow: hidden;
-  color: transparent;
-  font-size: 0;
-  background: url("assets/quotedecoder-banner.png") center 35% / cover no-repeat;
-}
-
 .settings-btn {
-  position: absolute;
-  right: 0;
-  background: rgba(0, 255, 65, 0.08);
-  border: 1px solid rgba(0, 255, 65, 0.3);
-  border-radius: 0.2rem;
   color: var(--muted);
-  cursor: pointer;
   font-size: 1.1rem;
-  line-height: 1;
-  padding: 0.3rem 0.5rem;
 }
 
 .settings-btn:hover,
@@ -277,6 +207,7 @@ body::after {
 }
 
 .status {
+  margin: 1rem clamp(0.3rem, 1vw, 0.65rem) 0;
   color: var(--muted);
   text-align: center;
   font-size: 1rem;
@@ -308,7 +239,7 @@ body::after {
 }
 
 .decoder-grid {
-  margin: 1rem 0 0;
+  margin: 1rem clamp(0.3rem, 1vw, 0.65rem) 0;
   display: flex;
   flex-wrap: wrap;
   gap: 0.35rem 1rem;
@@ -420,12 +351,20 @@ body::after {
   box-shadow: 0 0 0 1px var(--selected), 0 0 10px rgba(0, 229, 255, 0.35);
 }
 
-.btn-hint {
-  display: block;
-  width: 100%;
-  margin-top: 1rem;
-  padding: 0.7rem 1rem;
-  min-height: 2.75rem;
+.control-row {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  margin: 1rem clamp(0.3rem, 1vw, 0.65rem) 0;
+}
+
+.icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  padding: 0;
   font: inherit;
   font-size: 1.05rem;
   color: var(--accent);
@@ -434,51 +373,45 @@ body::after {
   border-radius: 0.2rem;
   cursor: pointer;
   touch-action: manipulation;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
 }
 
-.btn-hint:hover,
-.btn-hint:focus-visible {
+.icon-btn svg {
+  width: 1.4rem;
+  height: 1.4rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.icon-btn:hover,
+.icon-btn:focus-visible {
+  color: var(--accent);
+  border-color: var(--accent);
   background: rgba(0, 255, 65, 0.12);
   box-shadow: 0 0 0 1px var(--accent), 0 0 16px rgba(0, 255, 65, 0.3);
 }
 
-.btn-hint:active {
+.icon-btn:active {
   transform: translateY(1px);
 }
 
-.btn-hint:disabled {
+.icon-btn:disabled {
   opacity: 0.3;
   cursor: not-allowed;
 }
 
 .next {
-  display: block;
-  width: 100%;
-  margin-top: 0.5rem;
-  padding: 0.7rem 1rem;
-  min-height: 2.75rem;
-  font: inherit;
-  font-size: 1.05rem;
-  color: var(--bg);
-  background: var(--accent);
-  border: 0;
-  border-radius: 0.2rem;
-  cursor: pointer;
-  touch-action: manipulation;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
+  color: var(--accent);
+  background: rgba(0, 255, 65, 0.06);
+  border: 1px solid var(--accent);
   box-shadow: 0 0 16px rgba(0, 255, 65, 0.25);
 }
 
 .next:hover,
 .next:focus-visible {
-  filter: brightness(1.08);
-}
-
-.next:active {
-  transform: translateY(1px);
+  background: rgba(0, 255, 65, 0.12);
 }
 
 body.has-keyboard {
