@@ -387,9 +387,11 @@ body::before {
   border: 1px solid rgba(0, 255, 65, 0.2);
   border-radius: 0.2rem;
   background: rgba(0, 30, 12, 0.9);
-  color: var(--fg);
+  color: #e7ffe7;
   font: inherit;
   font-size: 0.95rem;
+  font-weight: 700;
+  text-shadow: 0 0 6px rgba(231, 255, 231, 0.45);
   cursor: pointer;
 }
 
