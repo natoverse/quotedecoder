@@ -46,16 +46,16 @@ body {
     inset 0 0 3rem rgba(0, 0, 0, 0.2);
 }
 
-.settings-btn {
-  color: var(--muted);
-  font-size: 1.1rem;
+.site-header {
+  margin: 0;
+  padding: 0;
 }
 
-.settings-btn:hover,
-.settings-btn:focus-visible {
-  color: var(--accent);
-  border-color: var(--accent);
-  box-shadow: 0 0 0 1px var(--accent), 0 0 12px rgba(0, 255, 65, 0.4);
+.site-banner {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin: 0;
 }
 
 .solved-overlay {
