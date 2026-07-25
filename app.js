@@ -328,8 +328,8 @@
       } else {
         fill.disabled = true;
         fill.className += " decoder-space";
-        fill.textContent = "";
-        encoded.textContent = ch;
+        fill.textContent = ch;
+        encoded.textContent = "";
       }
 
       cell.appendChild(fill);
