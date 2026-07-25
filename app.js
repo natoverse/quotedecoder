@@ -22,6 +22,7 @@
   var quoteEl = document.getElementById("quote");
   var encodedTextEl = document.getElementById("encoded-text");
   var keyboardEl = document.getElementById("keyboard");
+  var hintEl = document.getElementById("hint");
   var nextEl = document.getElementById("next");
   var settingsBtnEl = document.getElementById("settings-btn");
   var settingsOverlayEl = document.getElementById("settings-overlay");
@@ -174,6 +175,18 @@
     return used;
   }
 
+  function updateHintButton() {
+    var i, ch;
+    for (i = 0; i < currentEncodedText.length; i++) {
+      ch = currentEncodedText[i];
+      if (isAsciiLetter(ch) && !assignments[ch.toUpperCase()]) {
+        hintEl.disabled = false;
+        return;
+      }
+    }
+    hintEl.disabled = true;
+  }
+
   function updateKeyboardState() {
     var used = usedPlainLetters(selectedCipherLetter);
     var selectedPlain = selectedCipherLetter
@@ -276,6 +289,7 @@
           assignments[selectedCipherLetter] = plainLetter;
           renderDecoderGrid();
           updateKeyboardState();
+          updateHintButton();
         };
       })(letter));
       keyboardEl.appendChild(button);
@@ -292,6 +306,7 @@
       delete assignments[selectedCipherLetter];
       renderDecoderGrid();
       updateKeyboardState();
+      updateHintButton();
     });
     keyboardEl.appendChild(button);
   }
@@ -304,10 +319,12 @@
     assignments = {};
     renderDecoderGrid();
     updateKeyboardState();
+    updateHintButton();
     statusEl.hidden = true;
     quoteEl.hidden = false;
     keyboardEl.hidden = false;
     document.body.classList.add("has-keyboard");
+    hintEl.hidden = false;
     nextEl.hidden = false;
   }
 
@@ -317,6 +334,7 @@
     quoteEl.hidden = true;
     keyboardEl.hidden = true;
     document.body.classList.remove("has-keyboard");
+    hintEl.hidden = true;
     nextEl.hidden = true;
 
     var now = Date.now();
@@ -344,6 +362,28 @@
         showError("Sorry, we couldn't load a quote. Please try again.");
       });
   }
+
+  hintEl.addEventListener("click", function () {
+    var candidates = [];
+    var seen = {};
+    var i, ch, cipherLetter;
+    for (i = 0; i < currentEncodedText.length; i++) {
+      ch = currentEncodedText[i];
+      if (isAsciiLetter(ch)) {
+        cipherLetter = ch.toUpperCase();
+        if (!assignments[cipherLetter] && !seen[cipherLetter]) {
+          candidates.push(cipherLetter);
+          seen[cipherLetter] = true;
+        }
+      }
+    }
+    if (candidates.length === 0) return;
+    var pick = candidates[Math.floor(Math.random() * candidates.length)];
+    assignments[pick] = currentCipherInverse[pick];
+    renderDecoderGrid();
+    updateKeyboardState();
+    updateHintButton();
+  });
 
   function openSettings() {
     settingShowErrorsEl.checked = settings.showErrors;
