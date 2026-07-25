@@ -175,6 +175,43 @@
     return used;
   }
 
+  // After an assignment, advance selectedCipherLetter to the next cipher letter
+  // in the encoded text that has no assignment yet.
+  function advanceSelection() {
+    var len = currentEncodedText.length;
+    if (!len) return;
+
+    // Find the starting search position: just after the first occurrence of the
+    // currently-selected cipher letter.
+    var startPos = 0;
+    var i, ch, cipherLetter;
+    if (selectedCipherLetter) {
+      for (i = 0; i < len; i++) {
+        if (isAsciiLetter(currentEncodedText[i]) &&
+            currentEncodedText[i].toUpperCase() === selectedCipherLetter) {
+          startPos = i + 1;
+          break;
+        }
+      }
+    }
+
+    // Scan forward from startPos (wrapping) for the next unfilled cipher letter.
+    for (i = 0; i < len; i++) {
+      var pos = (startPos + i) % len;
+      ch = currentEncodedText[pos];
+      if (isAsciiLetter(ch)) {
+        cipherLetter = ch.toUpperCase();
+        if (!assignments[cipherLetter]) {
+          selectedCipherLetter = cipherLetter;
+          return;
+        }
+      }
+    }
+
+    // All cipher letters are filled.
+    selectedCipherLetter = null;
+  }
+
   function updateHintButton() {
     var i, ch;
     for (i = 0; i < currentEncodedText.length; i++) {
@@ -287,6 +324,7 @@
         return function () {
           if (!selectedCipherLetter) return;
           assignments[selectedCipherLetter] = plainLetter;
+          advanceSelection();
           renderDecoderGrid();
           updateKeyboardState();
           updateHintButton();
