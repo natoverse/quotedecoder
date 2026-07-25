@@ -46,24 +46,6 @@ body {
     inset 0 0 3rem rgba(0, 0, 0, 0.2);
 }
 
-.title-bar {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-  margin: 0;
-}
-
-.title {
-  margin: 0;
-  width: 100%;
-  height: clamp(5rem, 19vw, 10rem);
-  overflow: hidden;
-  color: transparent;
-  font-size: 0;
-  background: url("assets/quotedecoder-banner.png") center 35% / cover no-repeat;
-}
-
 .settings-btn {
   color: var(--muted);
   font-size: 1.1rem;
