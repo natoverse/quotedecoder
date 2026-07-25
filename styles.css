@@ -23,7 +23,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: max(1rem, env(safe-area-inset-top)) 1rem
+  padding: max(1rem, env(safe-area-inset-top)) 0.5rem
     max(1rem, env(safe-area-inset-bottom));
   background: radial-gradient(circle at top, var(--bg-accent), var(--bg));
   color: var(--fg);
@@ -38,7 +38,7 @@ body {
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 1rem;
-  padding: clamp(1.5rem, 5vw, 3rem);
+  padding: clamp(1rem, 5vw, 3rem);
   box-shadow: 0 1.5rem 3rem rgba(0, 0, 0, 0.35);
 }
 
