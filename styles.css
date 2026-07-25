@@ -81,12 +81,6 @@ body {
   content: "\2014\00a0";
 }
 
-.decoder-hint {
-  margin: 0 0 0.9rem;
-  color: var(--muted);
-  text-align: center;
-}
-
 .decoder-grid {
   margin: 1rem 0 0;
   display: flex;

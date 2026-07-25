@@ -19,7 +19,6 @@
 
   var statusEl = document.getElementById("status");
   var quoteEl = document.getElementById("quote");
-  var decoderHintEl = document.getElementById("decoder-hint");
   var encodedTextEl = document.getElementById("encoded-text");
   var keyboardEl = document.getElementById("keyboard");
   var nextEl = document.getElementById("next");
@@ -140,15 +139,6 @@
     return used;
   }
 
-  function updateHint() {
-    if (!selectedCipherLetter) {
-      decoderHintEl.textContent = "Tap a letter, then pick a replacement.";
-      return;
-    }
-    decoderHintEl.textContent =
-      "Selected " + selectedCipherLetter + ". Choose a letter or tap X to clear.";
-  }
-
   function updateKeyboardState() {
     var used = usedPlainLetters(selectedCipherLetter);
     var selectedPlain = selectedCipherLetter
@@ -213,7 +203,6 @@
         fill.addEventListener("click", (function (letter) {
           return function () {
             selectedCipherLetter = letter;
-            updateHint();
             renderDecoderGrid();
             updateKeyboardState();
           };
@@ -246,7 +235,6 @@
         return function () {
           if (!selectedCipherLetter) return;
           assignments[selectedCipherLetter] = plainLetter;
-          updateHint();
           renderDecoderGrid();
           updateKeyboardState();
         };
@@ -263,7 +251,6 @@
     button.addEventListener("click", function () {
       if (!selectedCipherLetter) return;
       delete assignments[selectedCipherLetter];
-      updateHint();
       renderDecoderGrid();
       updateKeyboardState();
     });
@@ -276,7 +263,6 @@
     selectedCipherLetter = null;
     assignments = {};
     renderDecoderGrid();
-    updateHint();
     updateKeyboardState();
     statusEl.hidden = true;
     quoteEl.hidden = false;
