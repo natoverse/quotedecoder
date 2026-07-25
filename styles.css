@@ -77,7 +77,87 @@ body {
   border-color: rgba(255, 255, 255, 0.4);
 }
 
-.settings-overlay {
+.solved-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.solved-overlay[hidden] {
+  display: none;
+}
+
+.solved-panel {
+  background: var(--bg-accent);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 1rem;
+  padding: 1.5rem;
+  width: min(36rem, 90vw);
+  box-shadow: 0 1rem 2.5rem rgba(0, 0, 0, 0.5);
+}
+
+.solved-heading {
+  margin: 0 0 1.1rem;
+  font-size: 1.25rem;
+  color: var(--accent);
+  text-align: center;
+}
+
+.solved-quote-figure {
+  margin: 0 0 1.25rem;
+}
+
+.solved-quote {
+  margin: 0 0 0.75rem;
+  padding: 0;
+  border: 0;
+  font-size: clamp(1rem, 3.5vw, 1.2rem);
+  line-height: 1.6;
+  quotes: "\201C" "\201D";
+}
+
+.solved-quote::before {
+  content: open-quote;
+}
+
+.solved-quote::after {
+  content: close-quote;
+}
+
+.solved-author {
+  color: var(--muted);
+  font-style: italic;
+  font-size: clamp(0.9rem, 3vw, 1rem);
+  text-align: right;
+}
+
+.solved-author::before {
+  content: "\2014\00a0";
+}
+
+.solved-close {
+  display: block;
+  width: 100%;
+  padding: 0.6rem;
+  font: inherit;
+  font-size: 0.95rem;
+  color: var(--bg);
+  background: var(--accent);
+  border: 0;
+  border-radius: 0.5rem;
+  cursor: pointer;
+}
+
+.solved-close:hover,
+.solved-close:focus-visible {
+  filter: brightness(1.08);
+}
+
+
   position: fixed;
   inset: 0;
   background: rgba(0, 0, 0, 0.55);

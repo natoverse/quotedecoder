@@ -21,6 +21,16 @@
     <button id="next" class="next" type="button" hidden>New quote</button>
   </main>
   <div id="keyboard" class="keyboard" aria-label="On-screen keyboard" hidden></div>
+  <div id="solved-overlay" class="solved-overlay" hidden>
+    <div class="solved-panel" role="dialog" aria-modal="true" aria-labelledby="solved-heading">
+      <h2 id="solved-heading" class="solved-heading">&#127881; Solved!</h2>
+      <figure class="solved-quote-figure">
+        <blockquote id="solved-quote" class="solved-quote"></blockquote>
+        <figcaption id="solved-author" class="solved-author"></figcaption>
+      </figure>
+      <button id="solved-close" type="button" class="solved-close">Dismiss</button>
+    </div>
+  </div>
   <div id="settings-overlay" class="settings-overlay" hidden>
     <div class="settings-panel" role="dialog" aria-modal="true" aria-labelledby="settings-heading">
       <h2 id="settings-heading" class="settings-heading">Settings</h2>
