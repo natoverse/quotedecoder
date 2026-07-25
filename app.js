@@ -14,6 +14,7 @@
 
   var N_BUCKETS = 100;
   var COOKIE_NAME = "qd_seen";
+  var SETTINGS_KEY = "qd_settings";
   var WINDOW_DAYS = 30;
   var WINDOW_MS = WINDOW_DAYS * 24 * 60 * 60 * 1000;
 
@@ -23,9 +24,15 @@
   var encodedTextEl = document.getElementById("encoded-text");
   var keyboardEl = document.getElementById("keyboard");
   var nextEl = document.getElementById("next");
+  var settingsBtnEl = document.getElementById("settings-btn");
+  var settingsOverlayEl = document.getElementById("settings-overlay");
+  var settingsCloseEl = document.getElementById("settings-close");
+  var settingShowErrorsEl = document.getElementById("setting-show-errors");
   var currentEncodedText = "";
   var selectedCipherLetter = null;
   var assignments = {};
+  var currentCipherInverse = {};
+  var settings = { showErrors: false };
 
   function readCookie(name) {
     var prefix = name + "=";
@@ -46,6 +53,34 @@
       "; max-age=" +
       Math.floor(WINDOW_MS / 1000) +
       "; path=/; samesite=lax";
+  }
+
+  function loadSettings() {
+    try {
+      var raw = localStorage.getItem(SETTINGS_KEY);
+      if (raw) {
+        var parsed = JSON.parse(raw);
+        if (parsed && typeof parsed.showErrors === "boolean") {
+          settings.showErrors = parsed.showErrors;
+        }
+      }
+    } catch (e) {}
+  }
+
+  function saveSettings() {
+    try {
+      localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
+    } catch (e) {}
+  }
+
+  function buildCipherInverse(cipher) {
+    var inv = {}, k;
+    for (k in cipher) {
+      if (Object.prototype.hasOwnProperty.call(cipher, k)) {
+        inv[cipher[k]] = k;
+      }
+    }
+    return inv;
   }
 
   // Returns the list of { id, ts } buckets seen within the window, pruning old ones.
@@ -203,7 +238,11 @@
 
       if (isAsciiLetter(ch)) {
         cipherLetter = ch.toUpperCase();
-        fill.textContent = assignments[cipherLetter] || "";
+        var assignedLetter = assignments[cipherLetter] || "";
+        var isWrong = settings.showErrors && assignedLetter &&
+          assignedLetter !== currentCipherInverse[cipherLetter];
+        fill.textContent = assignedLetter;
+        fill.className = "decoder-fill" + (isWrong ? " decoder-fill--error" : "");
         fill.setAttribute(
           "data-selected",
           selectedCipherLetter === cipherLetter ? "true" : "false"
@@ -272,6 +311,7 @@
 
   function showQuote(quote) {
     var cipher = generateCipher();
+    currentCipherInverse = buildCipherInverse(cipher);
     currentEncodedText = encodeText(quote.quote, cipher);
     selectedCipherLetter = null;
     assignments = {};
@@ -319,7 +359,35 @@
       });
   }
 
+  function openSettings() {
+    settingShowErrorsEl.checked = settings.showErrors;
+    settingsOverlayEl.hidden = false;
+    settingsBtnEl.setAttribute("aria-expanded", "true");
+    settingsCloseEl.focus();
+  }
+
+  function closeSettings() {
+    settingsOverlayEl.hidden = true;
+    settingsBtnEl.setAttribute("aria-expanded", "false");
+    settingsBtnEl.focus();
+  }
+
+  settingsBtnEl.addEventListener("click", openSettings);
+  settingsCloseEl.addEventListener("click", closeSettings);
+  settingsOverlayEl.addEventListener("click", function (e) {
+    if (e.target === settingsOverlayEl) closeSettings();
+  });
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape" && !settingsOverlayEl.hidden) closeSettings();
+  });
+  settingShowErrorsEl.addEventListener("change", function () {
+    settings.showErrors = settingShowErrorsEl.checked;
+    saveSettings();
+    if (!quoteEl.hidden) renderDecoderGrid();
+  });
+
   nextEl.addEventListener("click", loadQuote);
   createKeyboard();
+  loadSettings();
   loadQuote();
 })();

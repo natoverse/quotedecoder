@@ -42,12 +42,102 @@ body {
   box-shadow: 0 1.5rem 3rem rgba(0, 0, 0, 0.35);
 }
 
-.title {
+.title-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
   margin: 0 0 1.5rem;
+}
+
+.title {
+  margin: 0;
   font-size: clamp(1.25rem, 5vw, 1.75rem);
   letter-spacing: 0.02em;
   color: var(--accent);
   text-align: center;
+}
+
+.settings-btn {
+  position: absolute;
+  right: 0;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 0.45rem;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 1.1rem;
+  line-height: 1;
+  padding: 0.3rem 0.5rem;
+}
+
+.settings-btn:hover,
+.settings-btn:focus-visible {
+  color: var(--fg);
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+.settings-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.settings-overlay[hidden] {
+  display: none;
+}
+
+.settings-panel {
+  background: var(--bg-accent);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 1rem;
+  padding: 1.5rem;
+  width: min(22rem, 90vw);
+  box-shadow: 0 1rem 2.5rem rgba(0, 0, 0, 0.5);
+}
+
+.settings-heading {
+  margin: 0 0 1.1rem;
+  font-size: 1.1rem;
+  color: var(--accent);
+}
+
+.settings-item {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  cursor: pointer;
+  font-size: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.settings-item input[type="checkbox"] {
+  width: 1.1rem;
+  height: 1.1rem;
+  cursor: pointer;
+  accent-color: var(--accent);
+}
+
+.settings-close {
+  display: block;
+  width: 100%;
+  padding: 0.6rem;
+  font: inherit;
+  font-size: 0.95rem;
+  color: var(--bg);
+  background: var(--accent);
+  border: 0;
+  border-radius: 0.5rem;
+  cursor: pointer;
+}
+
+.settings-close:hover,
+.settings-close:focus-visible {
+  filter: brightness(1.08);
 }
 
 .status {
@@ -127,6 +217,12 @@ body {
 .decoder-fill[data-selected="true"] {
   border-color: var(--accent);
   box-shadow: 0 0 0 1px var(--accent);
+}
+
+.decoder-fill--error {
+  border-color: #e05555;
+  color: #e05555;
+  box-shadow: 0 0 0 1px #e05555;
 }
 
 .decoder-encoded {
