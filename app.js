@@ -275,6 +275,17 @@
     }
   }
 
+  function wrapOverflowingWords() {
+    var containerWidth = encodedTextEl.clientWidth;
+    var words = encodedTextEl.querySelectorAll(".decoder-word");
+    var i;
+    for (i = 0; i < words.length; i++) {
+      if (words[i].scrollWidth > containerWidth) {
+        words[i].classList.add("decoder-word--break");
+      }
+    }
+  }
+
   function renderDecoderGrid() {
     var i, ch, cipherLetter, cell, fill, encoded, wordGroup;
     encodedTextEl.textContent = "";
@@ -335,6 +346,7 @@
       cell.appendChild(encoded);
       wordGroup.appendChild(cell);
     }
+    wrapOverflowingWords();
   }
 
   function createKeyboard() {
@@ -516,6 +528,11 @@
   });
 
   nextEl.addEventListener("click", loadQuote);
+  if (typeof ResizeObserver !== "undefined") {
+    new ResizeObserver(function () {
+      if (!quoteEl.hidden) wrapOverflowingWords();
+    }).observe(encodedTextEl);
+  }
   createKeyboard();
   loadSettings();
   loadQuote();

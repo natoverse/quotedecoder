@@ -314,6 +314,11 @@ body::before {
   gap: 0.25rem;
 }
 
+.decoder-word--break {
+  flex-wrap: wrap;
+  max-width: 100%;
+}
+
 .decoder-cell {
   min-width: 1.45rem;
   display: inline-flex;
