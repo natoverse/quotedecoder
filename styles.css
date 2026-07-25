@@ -1,13 +1,13 @@
 :root {
   color-scheme: dark;
-  --bg: #1f1713;
-  --bg-accent: #3a2a1f;
-  --fg: #efe2c2;
-  --muted: #bcae8b;
-  --accent: #b7261f;
-  --selected: #c8922a;
-  --panel: rgba(48, 34, 26, 0.92);
-  --line: rgba(239, 226, 194, 0.2);
+  --bg: #050d07;
+  --bg-accent: #0a1810;
+  --fg: #b4f0b4;
+  --muted: #4daa6b;
+  --accent: #00ff41;
+  --selected: #00e5ff;
+  --panel: rgba(5, 18, 10, 0.96);
+  --line: rgba(0, 255, 65, 0.18);
 }
 
 * {
@@ -26,11 +26,12 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: max(1rem, env(safe-area-inset-top)) 0.5rem
-    max(1rem, env(safe-area-inset-bottom));
+  padding: max(0.4rem, env(safe-area-inset-top)) 0.25rem
+    max(0.4rem, env(safe-area-inset-bottom));
   background:
-    radial-gradient(circle at top, rgba(100, 40, 30, 0.22), transparent 45%),
-    linear-gradient(145deg, var(--bg-accent), var(--bg) 55%);
+    radial-gradient(ellipse at top, rgba(0, 255, 65, 0.06), transparent 50%),
+    radial-gradient(ellipse at bottom right, rgba(0, 229, 255, 0.04), transparent 50%),
+    var(--bg);
   color: var(--fg);
   font-family: "Courier New", "Lucida Console", Monaco, monospace;
   line-height: 1.5;
@@ -49,32 +50,30 @@ body::before {
   background:
     repeating-linear-gradient(
       0deg,
-      rgba(255, 255, 255, 0.03) 0,
-      rgba(255, 255, 255, 0.03) 1px,
+      rgba(0, 255, 65, 0.025) 0,
+      rgba(0, 255, 65, 0.025) 1px,
       transparent 1px,
-      transparent 3px
+      transparent 4px
     );
-  opacity: 0.24;
+  opacity: 1;
 }
 
 .card {
   position: relative;
   width: 100%;
-  max-width: 42rem;
+  max-width: 56rem;
   background: var(--panel);
   border: 1px solid var(--line);
-  border-radius: 0.35rem;
-  padding: clamp(0.75rem, 4vw, 1.75rem);
+  border-radius: 0.2rem;
+  padding: clamp(0.4rem, 2vw, 0.75rem);
   box-shadow:
-    0 1.4rem 2.8rem rgba(0, 0, 0, 0.5),
-    inset 0 0 0 1px rgba(183, 38, 31, 0.16);
+    0 0 0 1px rgba(0, 255, 65, 0.08),
+    0 1rem 2.5rem rgba(0, 0, 0, 0.7),
+    0 0 40px rgba(0, 255, 65, 0.04);
 }
 
 .card::before {
-  position: absolute;
-  inset: 0.8rem;
-  border: 1px dashed rgba(239, 226, 194, 0.17);
-  border-radius: 0.2rem;
+  display: none;
 }
 
 .title-bar {
@@ -82,7 +81,7 @@ body::before {
   align-items: center;
   justify-content: center;
   position: relative;
-  margin: 0 0 1.7rem;
+  margin: 0 0 1rem;
 }
 
 .title {
@@ -92,14 +91,18 @@ body::before {
   text-transform: uppercase;
   color: var(--accent);
   text-align: center;
-  text-shadow: 0.08em 0.08em 0 rgba(0, 0, 0, 0.55);
+  text-shadow:
+    0 0 8px rgba(0, 255, 65, 0.7),
+    0 0 20px rgba(0, 255, 65, 0.3),
+    0.05em 0 0 rgba(0, 229, 255, 0.4),
+    -0.05em 0 0 rgba(255, 0, 128, 0.3);
 }
 
 .settings-btn {
   position: absolute;
   right: 0;
-  background: rgba(85, 55, 42, 0.66);
-  border: 1px solid rgba(239, 226, 194, 0.28);
+  background: rgba(0, 255, 65, 0.08);
+  border: 1px solid rgba(0, 255, 65, 0.3);
   border-radius: 0.2rem;
   color: var(--muted);
   cursor: pointer;
@@ -110,9 +113,9 @@ body::before {
 
 .settings-btn:hover,
 .settings-btn:focus-visible {
-  color: var(--fg);
+  color: var(--accent);
   border-color: var(--accent);
-  box-shadow: 0 0 0 1px var(--accent), 0 0 12px rgba(183, 38, 31, 0.4);
+  box-shadow: 0 0 0 1px var(--accent), 0 0 12px rgba(0, 255, 65, 0.4);
 }
 
 .solved-overlay {
@@ -131,11 +134,11 @@ body::before {
 
 .solved-panel {
   background: var(--bg-accent);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 1rem;
-  padding: 1.5rem;
+  border: 1px solid rgba(0, 255, 65, 0.25);
+  border-radius: 0.2rem;
+  padding: 1.25rem;
   width: min(36rem, 90vw);
-  box-shadow: 0 1rem 2.5rem rgba(0, 0, 0, 0.5);
+  box-shadow: 0 0 30px rgba(0, 255, 65, 0.1), 0 1rem 2.5rem rgba(0, 0, 0, 0.6);
 }
 
 .solved-heading {
@@ -186,8 +189,9 @@ body::before {
   color: var(--bg);
   background: var(--accent);
   border: 0;
-  border-radius: 0.5rem;
+  border-radius: 0.2rem;
   cursor: pointer;
+  text-shadow: none;
 }
 
 .solved-close:hover,
@@ -212,12 +216,12 @@ body::before {
 .settings-panel {
   background: var(--panel);
   border: 1px solid var(--line);
-  border-radius: 0.35rem;
-  padding: 1.5rem;
+  border-radius: 0.2rem;
+  padding: 1.25rem;
   width: min(22rem, 90vw);
   box-shadow:
-    0 1rem 2.5rem rgba(0, 0, 0, 0.5),
-    inset 0 0 0 1px rgba(183, 38, 31, 0.16);
+    0 1rem 2.5rem rgba(0, 0, 0, 0.6),
+    0 0 20px rgba(0, 255, 65, 0.06);
 }
 
 .settings-heading {
@@ -248,8 +252,8 @@ body::before {
   padding: 0.6rem;
   font: inherit;
   font-size: 0.95rem;
-  color: #f9ebcf;
-  background: linear-gradient(180deg, #c73931, #991f1a);
+  color: var(--bg);
+  background: var(--accent);
   border: 0;
   border-radius: 0.2rem;
   cursor: pointer;
@@ -321,9 +325,9 @@ body::before {
 .decoder-fill {
   width: 1.45rem;
   height: 1.55rem;
-  border: 1px solid rgba(239, 226, 194, 0.34);
+  border: 1px solid rgba(0, 255, 65, 0.25);
   border-radius: 0.1rem;
-  background: rgba(85, 55, 42, 0.66);
+  background: rgba(0, 20, 8, 0.8);
   color: var(--fg);
   font: inherit;
   font-size: 0.95rem;
@@ -333,13 +337,13 @@ body::before {
 
 .decoder-fill[data-selected="true"] {
   border-color: var(--selected);
-  box-shadow: 0 0 0 1px var(--selected), 0 0 12px rgba(200, 146, 42, 0.45);
+  box-shadow: 0 0 0 1px var(--selected), 0 0 10px rgba(0, 229, 255, 0.4);
 }
 
 .decoder-fill--error {
-  border-color: #e05555;
-  color: #e05555;
-  box-shadow: 0 0 0 1px #e05555;
+  border-color: #ff0055;
+  color: #ff0055;
+  box-shadow: 0 0 0 1px #ff0055;
 }
 
 .decoder-encoded {
@@ -362,13 +366,13 @@ body::before {
   display: flex;
   flex-direction: column;
   gap: 0.35rem;
-  padding: 0.75rem
-    max(1rem, env(safe-area-inset-right))
-    max(0.75rem, env(safe-area-inset-bottom))
-    max(1rem, env(safe-area-inset-left));
-  background: rgba(30, 22, 16, 0.95);
+  padding: 0.5rem
+    max(0.5rem, env(safe-area-inset-right))
+    max(0.5rem, env(safe-area-inset-bottom))
+    max(0.5rem, env(safe-area-inset-left));
+  background: rgba(3, 12, 6, 0.97);
   border-top: 1px solid var(--line);
-  box-shadow: 0 -0.9rem 2rem rgba(0, 0, 0, 0.35);
+  box-shadow: 0 -0.5rem 1.5rem rgba(0, 0, 0, 0.5);
   z-index: 100;
 }
 
@@ -380,9 +384,9 @@ body::before {
 .keyboard-key {
   flex: 1;
   min-height: 2.25rem;
-  border: 1px solid rgba(239, 226, 194, 0.28);
+  border: 1px solid rgba(0, 255, 65, 0.2);
   border-radius: 0.2rem;
-  background: linear-gradient(180deg, rgba(100, 65, 50, 0.8), rgba(65, 44, 36, 0.86));
+  background: rgba(0, 30, 12, 0.9);
   color: var(--fg);
   font: inherit;
   font-size: 0.95rem;
@@ -390,25 +394,25 @@ body::before {
 }
 
 .keyboard-key:disabled {
-  opacity: 0.35;
+  opacity: 0.25;
   cursor: not-allowed;
 }
 
 .keyboard-key[data-selected="true"] {
   border-color: var(--selected);
-  box-shadow: 0 0 0 1px var(--selected), 0 0 12px rgba(200, 146, 42, 0.4);
+  box-shadow: 0 0 0 1px var(--selected), 0 0 10px rgba(0, 229, 255, 0.35);
 }
 
 .btn-hint {
   display: block;
   width: 100%;
-  margin-top: 2rem;
-  padding: 0.9rem 1rem;
-  min-height: 3rem;
+  margin-top: 1rem;
+  padding: 0.7rem 1rem;
+  min-height: 2.75rem;
   font: inherit;
   font-size: 1.05rem;
-  color: #f9ebcf;
-  background: rgba(85, 55, 42, 0.66);
+  color: var(--accent);
+  background: rgba(0, 255, 65, 0.06);
   border: 1px solid var(--accent);
   border-radius: 0.2rem;
   cursor: pointer;
@@ -419,8 +423,8 @@ body::before {
 
 .btn-hint:hover,
 .btn-hint:focus-visible {
-  background: rgba(183, 38, 31, 0.2);
-  box-shadow: 0 0 0 1px var(--accent), 0 0 12px rgba(183, 38, 31, 0.4);
+  background: rgba(0, 255, 65, 0.12);
+  box-shadow: 0 0 0 1px var(--accent), 0 0 16px rgba(0, 255, 65, 0.3);
 }
 
 .btn-hint:active {
@@ -428,27 +432,27 @@ body::before {
 }
 
 .btn-hint:disabled {
-  opacity: 0.35;
+  opacity: 0.3;
   cursor: not-allowed;
 }
 
 .next {
   display: block;
   width: 100%;
-  margin-top: 0.75rem;
-  padding: 0.9rem 1rem;
-  min-height: 3rem;
+  margin-top: 0.5rem;
+  padding: 0.7rem 1rem;
+  min-height: 2.75rem;
   font: inherit;
   font-size: 1.05rem;
-  color: #f9ebcf;
-  background: linear-gradient(180deg, #c73931, #991f1a);
+  color: var(--bg);
+  background: var(--accent);
   border: 0;
   border-radius: 0.2rem;
   cursor: pointer;
   touch-action: manipulation;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  box-shadow: 0 0.35rem 0.95rem rgba(0, 0, 0, 0.4);
+  box-shadow: 0 0 16px rgba(0, 255, 65, 0.25);
 }
 
 .next:hover,
