@@ -14,20 +14,25 @@
 
   var N_BUCKETS = 100;
   var COOKIE_NAME = "qd_seen";
+  var SETTINGS_KEY = "qd_settings";
   var WINDOW_DAYS = 30;
   var WINDOW_MS = WINDOW_DAYS * 24 * 60 * 60 * 1000;
 
   var statusEl = document.getElementById("status");
   var quoteEl = document.getElementById("quote");
-  var decoderHintEl = document.getElementById("decoder-hint");
   var encodedTextEl = document.getElementById("encoded-text");
   var keyboardEl = document.getElementById("keyboard");
   var hintEl = document.getElementById("hint");
   var nextEl = document.getElementById("next");
+  var settingsBtnEl = document.getElementById("settings-btn");
+  var settingsOverlayEl = document.getElementById("settings-overlay");
+  var settingsCloseEl = document.getElementById("settings-close");
+  var settingShowErrorsEl = document.getElementById("setting-show-errors");
   var currentEncodedText = "";
   var selectedCipherLetter = null;
   var assignments = {};
-  var cipherToPlain = {};
+  var currentCipherInverse = {};
+  var settings = { showErrors: false };
 
   function readCookie(name) {
     var prefix = name + "=";
@@ -48,6 +53,34 @@
       "; max-age=" +
       Math.floor(WINDOW_MS / 1000) +
       "; path=/; samesite=lax";
+  }
+
+  function loadSettings() {
+    try {
+      var raw = localStorage.getItem(SETTINGS_KEY);
+      if (raw) {
+        var parsed = JSON.parse(raw);
+        if (parsed && typeof parsed.showErrors === "boolean") {
+          settings.showErrors = parsed.showErrors;
+        }
+      }
+    } catch (e) {}
+  }
+
+  function saveSettings() {
+    try {
+      localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
+    } catch (e) {}
+  }
+
+  function buildCipherInverse(cipher) {
+    var inv = {}, k;
+    for (k in cipher) {
+      if (Object.prototype.hasOwnProperty.call(cipher, k)) {
+        inv[cipher[k]] = k;
+      }
+    }
+    return inv;
   }
 
   // Returns the list of { id, ts } buckets seen within the window, pruning old ones.
@@ -142,15 +175,6 @@
     return used;
   }
 
-  function updateHint() {
-    if (!selectedCipherLetter) {
-      decoderHintEl.textContent = "Tap a letter, then pick a replacement.";
-      return;
-    }
-    decoderHintEl.textContent =
-      "Selected " + selectedCipherLetter + ". Choose a letter or tap \u2715 to clear.";
-  }
-
   function updateHintButton() {
     var i, ch;
     for (i = 0; i < currentEncodedText.length; i++) {
@@ -217,7 +241,11 @@
 
       if (isAsciiLetter(ch)) {
         cipherLetter = ch.toUpperCase();
-        fill.textContent = assignments[cipherLetter] || "";
+        var assignedLetter = assignments[cipherLetter] || "";
+        var isWrong = settings.showErrors && assignedLetter &&
+          assignedLetter !== currentCipherInverse[cipherLetter];
+        fill.textContent = assignedLetter;
+        fill.className = "decoder-fill" + (isWrong ? " decoder-fill--error" : "");
         fill.setAttribute(
           "data-selected",
           selectedCipherLetter === cipherLetter ? "true" : "false"
@@ -227,7 +255,6 @@
         fill.addEventListener("click", (function (letter) {
           return function () {
             selectedCipherLetter = letter;
-            updateHint();
             renderDecoderGrid();
             updateKeyboardState();
           };
@@ -260,7 +287,6 @@
         return function () {
           if (!selectedCipherLetter) return;
           assignments[selectedCipherLetter] = plainLetter;
-          updateHint();
           renderDecoderGrid();
           updateKeyboardState();
           updateHintButton();
@@ -278,7 +304,6 @@
     button.addEventListener("click", function () {
       if (!selectedCipherLetter) return;
       delete assignments[selectedCipherLetter];
-      updateHint();
       renderDecoderGrid();
       updateKeyboardState();
       updateHintButton();
@@ -288,18 +313,11 @@
 
   function showQuote(quote) {
     var cipher = generateCipher();
-    var letter;
-    cipherToPlain = {};
-    for (letter in cipher) {
-      if (/[A-Z]/.test(letter)) {
-        cipherToPlain[cipher[letter]] = letter;
-      }
-    }
+    currentCipherInverse = buildCipherInverse(cipher);
     currentEncodedText = encodeText(quote.quote, cipher);
     selectedCipherLetter = null;
     assignments = {};
     renderDecoderGrid();
-    updateHint();
     updateKeyboardState();
     updateHintButton();
     statusEl.hidden = true;
@@ -361,13 +379,41 @@
     }
     if (candidates.length === 0) return;
     var pick = candidates[Math.floor(Math.random() * candidates.length)];
-    assignments[pick] = cipherToPlain[pick];
+    assignments[pick] = currentCipherInverse[pick];
     renderDecoderGrid();
     updateKeyboardState();
     updateHintButton();
   });
 
+  function openSettings() {
+    settingShowErrorsEl.checked = settings.showErrors;
+    settingsOverlayEl.hidden = false;
+    settingsBtnEl.setAttribute("aria-expanded", "true");
+    settingsCloseEl.focus();
+  }
+
+  function closeSettings() {
+    settingsOverlayEl.hidden = true;
+    settingsBtnEl.setAttribute("aria-expanded", "false");
+    settingsBtnEl.focus();
+  }
+
+  settingsBtnEl.addEventListener("click", openSettings);
+  settingsCloseEl.addEventListener("click", closeSettings);
+  settingsOverlayEl.addEventListener("click", function (e) {
+    if (e.target === settingsOverlayEl) closeSettings();
+  });
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape" && !settingsOverlayEl.hidden) closeSettings();
+  });
+  settingShowErrorsEl.addEventListener("change", function () {
+    settings.showErrors = settingShowErrorsEl.checked;
+    saveSettings();
+    if (!quoteEl.hidden) renderDecoderGrid();
+  });
+
   nextEl.addEventListener("click", loadQuote);
   createKeyboard();
+  loadSettings();
   loadQuote();
 })();

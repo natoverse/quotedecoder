@@ -23,7 +23,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: max(1rem, env(safe-area-inset-top)) 1rem
+  padding: max(1rem, env(safe-area-inset-top)) 0.5rem
     max(1rem, env(safe-area-inset-bottom));
   background: radial-gradient(circle at top, var(--bg-accent), var(--bg));
   color: var(--fg);
@@ -38,16 +38,106 @@ body {
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 1rem;
-  padding: clamp(1.5rem, 5vw, 3rem);
+  padding: clamp(1rem, 5vw, 3rem);
   box-shadow: 0 1.5rem 3rem rgba(0, 0, 0, 0.35);
 }
 
-.title {
+.title-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
   margin: 0 0 1.5rem;
+}
+
+.title {
+  margin: 0;
   font-size: clamp(1.25rem, 5vw, 1.75rem);
   letter-spacing: 0.02em;
   color: var(--accent);
   text-align: center;
+}
+
+.settings-btn {
+  position: absolute;
+  right: 0;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 0.45rem;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 1.1rem;
+  line-height: 1;
+  padding: 0.3rem 0.5rem;
+}
+
+.settings-btn:hover,
+.settings-btn:focus-visible {
+  color: var(--fg);
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+.settings-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.settings-overlay[hidden] {
+  display: none;
+}
+
+.settings-panel {
+  background: var(--bg-accent);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 1rem;
+  padding: 1.5rem;
+  width: min(22rem, 90vw);
+  box-shadow: 0 1rem 2.5rem rgba(0, 0, 0, 0.5);
+}
+
+.settings-heading {
+  margin: 0 0 1.1rem;
+  font-size: 1.1rem;
+  color: var(--accent);
+}
+
+.settings-item {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  cursor: pointer;
+  font-size: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.settings-item input[type="checkbox"] {
+  width: 1.1rem;
+  height: 1.1rem;
+  cursor: pointer;
+  accent-color: var(--accent);
+}
+
+.settings-close {
+  display: block;
+  width: 100%;
+  padding: 0.6rem;
+  font: inherit;
+  font-size: 0.95rem;
+  color: var(--bg);
+  background: var(--accent);
+  border: 0;
+  border-radius: 0.5rem;
+  cursor: pointer;
+}
+
+.settings-close:hover,
+.settings-close:focus-visible {
+  filter: brightness(1.08);
 }
 
 .status {
@@ -79,12 +169,6 @@ body {
 
 .quote-author::before {
   content: "\2014\00a0";
-}
-
-.decoder-hint {
-  margin: 0 0 0.9rem;
-  color: var(--muted);
-  text-align: center;
 }
 
 .decoder-grid {
@@ -127,6 +211,12 @@ body {
 .decoder-fill[data-selected="true"] {
   border-color: var(--accent);
   box-shadow: 0 0 0 1px var(--accent);
+}
+
+.decoder-fill--error {
+  border-color: #e05555;
+  color: #e05555;
+  box-shadow: 0 0 0 1px #e05555;
 }
 
 .decoder-encoded {
@@ -236,4 +326,25 @@ body {
 
 body.has-keyboard {
   padding-bottom: max(13rem, calc(11rem + env(safe-area-inset-bottom)));
+}
+
+.site-footer {
+  position: fixed;
+  bottom: 0.75rem;
+  right: 1rem;
+  z-index: 50;
+}
+
+.github-link {
+  color: var(--muted);
+  font-family: "Georgia", "Times New Roman", serif;
+  font-size: 0.8rem;
+  text-decoration: none;
+  opacity: 0.6;
+}
+
+.github-link:hover,
+.github-link:focus-visible {
+  color: var(--accent);
+  opacity: 1;
 }
