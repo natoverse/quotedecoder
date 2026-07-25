@@ -183,10 +183,40 @@ body {
   grid-column: span 2;
 }
 
-.next {
+.btn-hint {
   display: block;
   width: 100%;
   margin-top: 2rem;
+  padding: 0.9rem 1rem;
+  min-height: 3rem;
+  font: inherit;
+  font-size: 1.05rem;
+  color: var(--accent);
+  background: transparent;
+  border: 1px solid var(--accent);
+  border-radius: 0.65rem;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.btn-hint:hover,
+.btn-hint:focus-visible {
+  background: rgba(124, 134, 255, 0.1);
+}
+
+.btn-hint:active {
+  transform: translateY(1px);
+}
+
+.btn-hint:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.next {
+  display: block;
+  width: 100%;
+  margin-top: 0.75rem;
   padding: 0.9rem 1rem;
   min-height: 3rem;
   font: inherit;
