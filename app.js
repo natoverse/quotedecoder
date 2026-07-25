@@ -28,10 +28,15 @@
   var settingsOverlayEl = document.getElementById("settings-overlay");
   var settingsCloseEl = document.getElementById("settings-close");
   var settingShowErrorsEl = document.getElementById("setting-show-errors");
+  var solvedOverlayEl = document.getElementById("solved-overlay");
+  var solvedQuoteEl = document.getElementById("solved-quote");
+  var solvedAuthorEl = document.getElementById("solved-author");
+  var solvedCloseEl = document.getElementById("solved-close");
   var currentEncodedText = "";
   var selectedCipherLetter = null;
   var assignments = {};
   var currentCipherInverse = {};
+  var currentQuote = null;
   var settings = { showErrors: false };
 
   function readCookie(name) {
@@ -293,6 +298,7 @@
             renderDecoderGrid();
             updateKeyboardState();
             updateHintButton();
+            checkSolved();
           };
         })(letter));
         rowEl.appendChild(button);
@@ -318,6 +324,7 @@
   }
 
   function showQuote(quote) {
+    currentQuote = quote;
     var cipher = generateCipher();
     currentCipherInverse = buildCipherInverse(cipher);
     currentEncodedText = encodeText(quote.quote, cipher);
@@ -342,6 +349,7 @@
     document.body.classList.remove("has-keyboard");
     hintEl.hidden = true;
     nextEl.hidden = true;
+    solvedOverlayEl.hidden = true;
 
     var now = Date.now();
     var seen = loadSeen(now);
@@ -389,7 +397,33 @@
     renderDecoderGrid();
     updateKeyboardState();
     updateHintButton();
+    checkSolved();
   });
+
+  function checkSolved() {
+    var i, ch, cipherLetter;
+    for (i = 0; i < currentEncodedText.length; i++) {
+      ch = currentEncodedText[i];
+      if (isAsciiLetter(ch)) {
+        cipherLetter = ch.toUpperCase();
+        if (assignments[cipherLetter] !== currentCipherInverse[cipherLetter]) {
+          return;
+        }
+      }
+    }
+    openSolvedPanel();
+  }
+
+  function openSolvedPanel() {
+    solvedQuoteEl.textContent = currentQuote.quote;
+    solvedAuthorEl.textContent = currentQuote.author;
+    solvedOverlayEl.hidden = false;
+    solvedCloseEl.focus();
+  }
+
+  function closeSolvedPanel() {
+    solvedOverlayEl.hidden = true;
+  }
 
   function openSettings() {
     settingShowErrorsEl.checked = settings.showErrors;
@@ -404,13 +438,21 @@
     settingsBtnEl.focus();
   }
 
+  solvedCloseEl.addEventListener("click", closeSolvedPanel);
+  solvedOverlayEl.addEventListener("click", function (e) {
+    if (e.target === solvedOverlayEl) closeSolvedPanel();
+  });
+
   settingsBtnEl.addEventListener("click", openSettings);
   settingsCloseEl.addEventListener("click", closeSettings);
   settingsOverlayEl.addEventListener("click", function (e) {
     if (e.target === settingsOverlayEl) closeSettings();
   });
   document.addEventListener("keydown", function (e) {
-    if (e.key === "Escape" && !settingsOverlayEl.hidden) closeSettings();
+    if (e.key === "Escape") {
+      if (!solvedOverlayEl.hidden) closeSolvedPanel();
+      else if (!settingsOverlayEl.hidden) closeSettings();
+    }
   });
   settingShowErrorsEl.addEventListener("change", function () {
     settings.showErrors = settingShowErrorsEl.checked;
