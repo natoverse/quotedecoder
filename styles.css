@@ -475,6 +475,10 @@ body.has-keyboard {
   padding-bottom: max(13rem, calc(11rem + env(safe-area-inset-bottom)));
 }
 
+body.has-keyboard .site-footer {
+  bottom: calc(9rem + env(safe-area-inset-bottom));
+}
+
 .site-footer {
   position: fixed;
   bottom: 0.75rem;
@@ -487,11 +491,9 @@ body.has-keyboard {
   font-family: "Georgia", "Times New Roman", serif;
   font-size: 0.8rem;
   text-decoration: none;
-  opacity: 0.6;
 }
 
 .github-link:hover,
 .github-link:focus-visible {
   color: var(--accent);
-  opacity: 1;
 }
