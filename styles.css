@@ -25,7 +25,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: max(1rem, env(safe-area-inset-top)) 1rem
+  padding: max(1rem, env(safe-area-inset-top)) 0.5rem
     max(1rem, env(safe-area-inset-bottom));
   background:
     radial-gradient(circle at top, rgba(95, 28, 23, 0.35), transparent 45%),
@@ -63,7 +63,7 @@ body::before {
   background: var(--panel);
   border: 1px solid var(--line);
   border-radius: 0.35rem;
-  padding: clamp(1.5rem, 5vw, 3rem);
+  padding: clamp(1rem, 5vw, 3rem);
   box-shadow:
     0 1.4rem 2.8rem rgba(0, 0, 0, 0.5),
     inset 0 0 0 1px rgba(183, 38, 31, 0.16);
@@ -76,14 +76,109 @@ body::before {
   border-radius: 0.2rem;
 }
 
-.title {
+.title-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
   margin: 0 0 1.7rem;
+}
+
+.title {
+  margin: 0;
   font-size: clamp(1.25rem, 5vw, 1.75rem);
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--accent);
   text-align: center;
   text-shadow: 0.08em 0.08em 0 rgba(0, 0, 0, 0.55);
+}
+
+.settings-btn {
+  position: absolute;
+  right: 0;
+  background: rgba(68, 41, 32, 0.66);
+  border: 1px solid rgba(239, 226, 194, 0.28);
+  border-radius: 0.2rem;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 1.1rem;
+  line-height: 1;
+  padding: 0.3rem 0.5rem;
+}
+
+.settings-btn:hover,
+.settings-btn:focus-visible {
+  color: var(--fg);
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent), 0 0 12px rgba(183, 38, 31, 0.4);
+}
+
+.settings-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.settings-overlay[hidden] {
+  display: none;
+}
+
+.settings-panel {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 0.35rem;
+  padding: 1.5rem;
+  width: min(22rem, 90vw);
+  box-shadow:
+    0 1rem 2.5rem rgba(0, 0, 0, 0.5),
+    inset 0 0 0 1px rgba(183, 38, 31, 0.16);
+}
+
+.settings-heading {
+  margin: 0 0 1.1rem;
+  font-size: 1.1rem;
+  color: var(--accent);
+}
+
+.settings-item {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  cursor: pointer;
+  font-size: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.settings-item input[type="checkbox"] {
+  width: 1.1rem;
+  height: 1.1rem;
+  cursor: pointer;
+  accent-color: var(--accent);
+}
+
+.settings-close {
+  display: block;
+  width: 100%;
+  padding: 0.6rem;
+  font: inherit;
+  font-size: 0.95rem;
+  color: #f9ebcf;
+  background: linear-gradient(180deg, #c73931, #991f1a);
+  border: 0;
+  border-radius: 0.2rem;
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.settings-close:hover,
+.settings-close:focus-visible {
+  filter: brightness(1.08);
 }
 
 .status {
@@ -115,15 +210,6 @@ body::before {
 
 .quote-author::before {
   content: "\2014\00a0";
-}
-
-.decoder-hint {
-  margin: 0 0 0.9rem;
-  color: var(--muted);
-  text-align: center;
-  letter-spacing: 0.03em;
-  text-transform: uppercase;
-  font-size: 0.92rem;
 }
 
 .decoder-grid {
@@ -166,6 +252,12 @@ body::before {
 .decoder-fill[data-selected="true"] {
   border-color: var(--accent);
   box-shadow: 0 0 0 1px var(--accent), 0 0 12px rgba(183, 38, 31, 0.45);
+}
+
+.decoder-fill--error {
+  border-color: #e05555;
+  color: #e05555;
+  box-shadow: 0 0 0 1px #e05555;
 }
 
 .decoder-encoded {
@@ -219,10 +311,6 @@ body::before {
   box-shadow: 0 0 0 1px var(--accent), 0 0 12px rgba(183, 38, 31, 0.4);
 }
 
-.keyboard-clear {
-  grid-column: span 2;
-}
-
 .next {
   display: block;
   width: 100%;
@@ -253,4 +341,25 @@ body::before {
 
 body.has-keyboard {
   padding-bottom: max(13rem, calc(11rem + env(safe-area-inset-bottom)));
+}
+
+.site-footer {
+  position: fixed;
+  bottom: 0.75rem;
+  right: 1rem;
+  z-index: 50;
+}
+
+.github-link {
+  color: var(--muted);
+  font-family: "Georgia", "Times New Roman", serif;
+  font-size: 0.8rem;
+  text-decoration: none;
+  opacity: 0.6;
+}
+
+.github-link:hover,
+.github-link:focus-visible {
+  color: var(--accent);
+  opacity: 1;
 }

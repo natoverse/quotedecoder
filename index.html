@@ -9,15 +9,30 @@
 </head>
 <body>
   <main class="card" role="main">
-    <h1 class="title">Quote Decoder</h1>
+    <div class="title-bar">
+      <h1 class="title">Quote Decoder</h1>
+      <button id="settings-btn" class="settings-btn" type="button" aria-label="Open settings" aria-haspopup="dialog">&#9881;</button>
+    </div>
     <div id="status" class="status" role="status" aria-live="polite">Loading a quote&hellip;</div>
     <figure id="quote" class="quote" hidden>
-      <p id="decoder-hint" class="decoder-hint">Tap a letter, then pick a replacement.</p>
       <div id="encoded-text" class="decoder-grid" aria-label="Encoded quote"></div>
     </figure>
     <button id="next" class="next" type="button" hidden>New quote</button>
   </main>
   <div id="keyboard" class="keyboard" aria-label="On-screen keyboard" hidden></div>
+  <div id="settings-overlay" class="settings-overlay" hidden>
+    <div class="settings-panel" role="dialog" aria-modal="true" aria-labelledby="settings-heading">
+      <h2 id="settings-heading" class="settings-heading">Settings</h2>
+      <label class="settings-item">
+        <input type="checkbox" id="setting-show-errors" />
+        Show errors
+      </label>
+      <button id="settings-close" type="button" class="settings-close">Close</button>
+    </div>
+  </div>
+  <footer class="site-footer">
+    <a href="https://github.com/natoverse/quotedecoder" class="github-link" target="_blank" rel="noopener noreferrer">GitHub</a>
+  </footer>
   <script src="app.js"></script>
 </body>
 </html>
