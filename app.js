@@ -28,6 +28,9 @@
   var settingsOverlayEl = document.getElementById("settings-overlay");
   var settingsCloseEl = document.getElementById("settings-close");
   var settingShowErrorsEl = document.getElementById("setting-show-errors");
+  var themeOptionEls = document.querySelectorAll('input[name="theme"]');
+  var bannerEl = document.querySelector(".site-banner");
+  var themeColorEl = document.querySelector('meta[name="theme-color"]');
   var solvedOverlayEl = document.getElementById("solved-overlay");
   var solvedQuoteEl = document.getElementById("solved-quote");
   var solvedAuthorEl = document.getElementById("solved-author");
@@ -40,7 +43,7 @@
   var assignments = {};
   var currentCipherInverse = {};
   var currentQuote = null;
-  var settings = { showErrors: false };
+  var settings = { showErrors: false, theme: "hacker" };
 
   function readCookie(name) {
     var prefix = name + "=";
@@ -71,6 +74,9 @@
         if (parsed && typeof parsed.showErrors === "boolean") {
           settings.showErrors = parsed.showErrors;
         }
+        if (parsed && (parsed.theme === "hacker" || parsed.theme === "glitter")) {
+          settings.theme = parsed.theme;
+        }
       }
     } catch (e) {}
   }
@@ -79,6 +85,12 @@
     try {
       localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
     } catch (e) {}
+  }
+
+  function applyTheme(theme) {
+    document.documentElement.setAttribute("data-theme", theme);
+    bannerEl.src = "assets/quotedecoder-banner-" + theme + ".png";
+    themeColorEl.content = theme === "glitter" ? "#fff4fc" : "#050d07";
   }
 
   function buildCipherInverse(cipher) {
@@ -493,7 +505,11 @@
   }
 
   function openSettings() {
+    var i;
     settingShowErrorsEl.checked = settings.showErrors;
+    for (i = 0; i < themeOptionEls.length; i++) {
+      themeOptionEls[i].checked = themeOptionEls[i].value === settings.theme;
+    }
     settingsOverlayEl.hidden = false;
     settingsBtnEl.setAttribute("aria-expanded", "true");
     settingsCloseEl.focus();
@@ -526,6 +542,14 @@
     saveSettings();
     if (!quoteEl.hidden) renderDecoderGrid();
   });
+  Array.prototype.forEach.call(themeOptionEls, function (option) {
+    option.addEventListener("change", function () {
+      if (!option.checked) return;
+      settings.theme = option.value;
+      applyTheme(settings.theme);
+      saveSettings();
+    });
+  });
 
   nextEl.addEventListener("click", loadQuote);
   if (typeof ResizeObserver !== "undefined") {
@@ -535,5 +559,6 @@
   }
   createKeyboard();
   loadSettings();
+  applyTheme(settings.theme);
   loadQuote();
 })();
