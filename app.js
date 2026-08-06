@@ -89,7 +89,7 @@
 
   function applyTheme(theme) {
     document.documentElement.setAttribute("data-theme", theme);
-    bannerEl.src = "assets/quotedecoder-banner-" + theme + ".png";
+    bannerEl.src = "assets/banner-" + theme + ".png";
     themeColorEl.content = theme === "glitter" ? "#fff4fc" : "#050d07";
   }
 

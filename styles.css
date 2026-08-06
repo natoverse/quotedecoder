@@ -46,7 +46,7 @@ body {
   display: flex;
   align-items: flex-start;
   justify-content: center;
-  background: #000 url("assets/app-background-hacker.png") center top / 402px auto repeat-y;
+  background: #000 url("assets/background-hacker.png") center top / 402px auto repeat-y;
   color: var(--fg);
   font-family: "Courier New", "Lucida Console", Monaco, monospace;
   line-height: 1.5;
@@ -54,7 +54,7 @@ body {
 }
 
 :root[data-theme="glitter"] body {
-  background-image: url("assets/app-background-glitter.png");
+  background-image: url("assets/background-glitter.png");
 }
 
 .card {
