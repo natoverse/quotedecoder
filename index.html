@@ -10,7 +10,7 @@
 <body>
   <main class="card" role="main">
     <header class="site-header">
-      <img class="site-banner" src="assets/quotedecoder-banner.png" alt="Quote Decoder" />
+      <img class="site-banner" src="assets/quotedecoder-banner-hacker.png" alt="Quote Decoder" />
     </header>
     <div id="status" class="status" role="status" aria-live="polite">Loading a quote&hellip;</div>
     <figure id="quote" class="quote" hidden>
@@ -49,6 +49,19 @@
   <div id="settings-overlay" class="settings-overlay" hidden>
     <div class="settings-panel" role="dialog" aria-modal="true" aria-labelledby="settings-heading">
       <h2 id="settings-heading" class="settings-heading">Settings</h2>
+      <fieldset class="theme-setting">
+        <legend>Theme</legend>
+        <div class="theme-options">
+          <label>
+            <input type="radio" name="theme" value="hacker" />
+            <span>Hacker Collective</span>
+          </label>
+          <label>
+            <input type="radio" name="theme" value="glitter" />
+            <span>Glitter Shit</span>
+          </label>
+        </div>
+      </fieldset>
       <label class="settings-item">
         <input type="checkbox" id="setting-show-errors" />
         Show errors
