@@ -27,6 +27,9 @@
   var settingsBtnEl = document.getElementById("settings-btn");
   var settingsOverlayEl = document.getElementById("settings-overlay");
   var settingsCloseEl = document.getElementById("settings-close");
+  var helpBtnEl = document.getElementById("help-btn");
+  var helpOverlayEl = document.getElementById("help-overlay");
+  var helpCloseEl = document.getElementById("help-close");
   var settingShowErrorsEl = document.getElementById("setting-show-errors");
   var themeOptionEls = document.querySelectorAll('input[name="theme"]');
   var bannerEl = document.querySelector(".site-banner");
@@ -535,6 +538,18 @@
     settingsBtnEl.focus();
   }
 
+  function openHelp() {
+    helpOverlayEl.hidden = false;
+    helpBtnEl.setAttribute("aria-expanded", "true");
+    helpCloseEl.focus();
+  }
+
+  function closeHelp() {
+    helpOverlayEl.hidden = true;
+    helpBtnEl.setAttribute("aria-expanded", "false");
+    helpBtnEl.focus();
+  }
+
   solvedCloseEl.addEventListener("click", closeSolvedPanel);
   solvedOverlayEl.addEventListener("click", function (e) {
     if (e.target === solvedOverlayEl) closeSolvedPanel();
@@ -545,9 +560,15 @@
   settingsOverlayEl.addEventListener("click", function (e) {
     if (e.target === settingsOverlayEl) closeSettings();
   });
+  helpBtnEl.addEventListener("click", openHelp);
+  helpCloseEl.addEventListener("click", closeHelp);
+  helpOverlayEl.addEventListener("click", function (e) {
+    if (e.target === helpOverlayEl) closeHelp();
+  });
   document.addEventListener("keydown", function (e) {
     if (e.key === "Escape") {
       if (!solvedOverlayEl.hidden) closeSolvedPanel();
+      else if (!helpOverlayEl.hidden) closeHelp();
       else if (!settingsOverlayEl.hidden) closeSettings();
     }
   });
