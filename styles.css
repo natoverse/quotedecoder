@@ -299,6 +299,13 @@ body {
   color: var(--accent);
 }
 
+.help-text {
+  margin: 0 0 1.25rem;
+  color: var(--muted);
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
 .status {
   margin: 1rem clamp(0.3rem, 1vw, 0.65rem) 0;
   color: var(--muted);
