@@ -17,6 +17,7 @@
       <div id="encoded-text" class="decoder-grid" aria-label="Encoded quote"></div>
     </figure>
     <div class="control-row">
+      <button id="clear-all" class="icon-btn control-btn" type="button" hidden>Clear all</button>
       <button id="settings-btn" class="icon-btn settings-btn" type="button" aria-label="Open settings" aria-haspopup="dialog">
         <svg viewBox="0 0 24 24" aria-hidden="true">
           <circle cx="12" cy="12" r="3" />
@@ -33,6 +34,7 @@
           <path d="M20 7v5h-5m4.1 3a8 8 0 1 1-.6-7.8L20 9" />
         </svg>
       </button>
+      <a href="https://github.com/natoverse/quotedecoder" class="icon-btn control-btn" target="_blank" rel="noopener noreferrer">GitHub</a>
     </div>
   </main>
   <div id="keyboard" class="keyboard" aria-label="On-screen keyboard" hidden></div>
@@ -69,9 +71,6 @@
       <button id="settings-close" type="button" class="settings-close">Close</button>
     </div>
   </div>
-  <footer class="site-footer">
-    <a href="https://github.com/natoverse/quotedecoder" class="github-link" target="_blank" rel="noopener noreferrer">GitHub</a>
-  </footer>
   <script src="app.js"></script>
 </body>
 </html>
