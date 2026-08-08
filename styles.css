@@ -287,7 +287,7 @@ body {
 }
 
 .status {
-  margin: 1rem clamp(0.3rem, 1vw, 0.65rem) 10px;
+  margin: 1rem clamp(0.3rem, 1vw, 0.65rem) 0;
   color: var(--muted);
   text-align: center;
   font-size: 1rem;
@@ -435,7 +435,7 @@ body {
   display: flex;
   justify-content: center;
   gap: 0.5rem;
-  margin: 1rem clamp(0.3rem, 1vw, 0.65rem) 0;
+  margin: 1rem clamp(0.3rem, 1vw, 0.65rem) 10px;
 }
 
 .icon-btn {
