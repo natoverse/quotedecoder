@@ -474,7 +474,9 @@
     seen.push({ id: bucketId, ts: now });
     writeCookie(COOKIE_NAME, JSON.stringify(seen));
 
-    fetch("quotes/all/" + bucketId + ".json", { cache: "no-store" })
+    fetch(new URL("quotes/all/" + bucketId + ".json", document.baseURI), {
+      cache: "no-store"
+    })
       .then(function (response) {
         if (!response.ok) {
           throw new Error("HTTP " + response.status);
