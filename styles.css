@@ -287,7 +287,7 @@ body {
 }
 
 .status {
-  margin: 1rem clamp(0.3rem, 1vw, 0.65rem) 0;
+  margin: 1rem clamp(0.3rem, 1vw, 0.65rem) 10px;
   color: var(--muted);
   text-align: center;
   font-size: 1rem;
