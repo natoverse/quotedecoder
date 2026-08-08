@@ -208,20 +208,6 @@
     }
   }
 
-  function usedPlainLetters(exceptCipher) {
-    var used = {};
-    var cipher;
-    for (cipher in assignments) {
-      if (
-        Object.prototype.hasOwnProperty.call(assignments, cipher) &&
-        cipher !== exceptCipher
-      ) {
-        used[assignments[cipher]] = true;
-      }
-    }
-    return used;
-  }
-
   // After an assignment, advance selectedCipherLetter to the next cipher letter
   // to the right of the current text position that has no assignment yet.
   function advanceSelection() {
@@ -264,17 +250,20 @@
   }
 
   function updateKeyboardState() {
-    var used = usedPlainLetters(selectedCipherLetter);
     var selectedPlain = selectedCipherLetter
       ? assignments[selectedCipherLetter] || null
       : null;
     var buttons = keyboardEl.querySelectorAll(".keyboard-key");
-    var i, button, letter, isClear;
+    var i, button, letter, action;
     for (i = 0; i < buttons.length; i++) {
       button = buttons[i];
-      isClear = button.getAttribute("data-action") === "clear";
-      if (isClear) {
-        button.disabled = !(selectedCipherLetter && selectedPlain);
+      action = button.getAttribute("data-action");
+      if (action === "delete") {
+        button.disabled = !hasAssignments();
+        continue;
+      }
+      if (action === "clear-all") {
+        button.disabled = !hasAssignments();
         continue;
       }
       letter = button.getAttribute("data-letter");
@@ -282,8 +271,44 @@
         "data-selected",
         selectedPlain && selectedPlain === letter ? "true" : "false"
       );
-      button.disabled =
-        !selectedCipherLetter || (used[letter] && selectedPlain !== letter);
+      button.disabled = !selectedCipherLetter;
+    }
+  }
+
+  function hasAssignments() {
+    return Object.keys(assignments).length > 0;
+  }
+
+  function selectPreviousAssigned(beforePos) {
+    var len = currentEncodedText.length;
+    var i, pos, ch, cipherLetter;
+    for (i = 1; i <= len; i++) {
+      pos = (beforePos - i + len) % len;
+      ch = currentEncodedText[pos];
+      if (isAsciiLetter(ch)) {
+        cipherLetter = ch.toUpperCase();
+        if (assignments[cipherLetter]) {
+          selectedCipherLetter = cipherLetter;
+          selectedTextPos = pos;
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
+  function deletePreviousAssignment() {
+    var startPos = selectedTextPos >= 0 ? selectedTextPos : 0;
+    if (selectedCipherLetter && assignments[selectedCipherLetter]) {
+      delete assignments[selectedCipherLetter];
+    } else {
+      if (!selectPreviousAssigned(startPos)) return;
+      delete assignments[selectedCipherLetter];
+      startPos = selectedTextPos;
+    }
+    if (!selectPreviousAssigned(startPos)) {
+      selectedCipherLetter = null;
+      selectedTextPos = -1;
     }
   }
 
@@ -378,6 +403,15 @@
         button.addEventListener("click", (function (plainLetter) {
           return function () {
             if (!selectedCipherLetter) return;
+            var cipherLetter;
+            for (cipherLetter in assignments) {
+              if (
+                Object.prototype.hasOwnProperty.call(assignments, cipherLetter) &&
+                assignments[cipherLetter] === plainLetter
+              ) {
+                delete assignments[cipherLetter];
+              }
+            }
             assignments[selectedCipherLetter] = plainLetter;
             advanceSelection();
             renderDecoderGrid();
@@ -392,12 +426,11 @@
         button = document.createElement("button");
         button.type = "button";
         button.className = "keyboard-key keyboard-clear";
-        button.setAttribute("data-action", "clear");
-        button.setAttribute("aria-label", "Clear selected letter");
+        button.setAttribute("data-action", "delete");
+        button.setAttribute("aria-label", "Delete previous letter");
         button.textContent = "\u2715";
         button.addEventListener("click", function () {
-          if (!selectedCipherLetter) return;
-          delete assignments[selectedCipherLetter];
+          deletePreviousAssignment();
           renderDecoderGrid();
           updateKeyboardState();
           updateHintButton();
@@ -406,6 +439,19 @@
       }
       keyboardEl.appendChild(rowEl);
     }
+    var clearAllButton = document.createElement("button");
+    clearAllButton.type = "button";
+    clearAllButton.className = "keyboard-key keyboard-clear-all";
+    clearAllButton.setAttribute("data-action", "clear-all");
+    clearAllButton.setAttribute("aria-label", "Clear all letters");
+    clearAllButton.textContent = "\u2715 Clear all";
+    clearAllButton.addEventListener("click", function () {
+      assignments = {};
+      renderDecoderGrid();
+      updateKeyboardState();
+      updateHintButton();
+    });
+    keyboardEl.appendChild(clearAllButton);
   }
 
   function showQuote(quote) {
