@@ -24,6 +24,7 @@
   var keyboardEl = document.getElementById("keyboard");
   var hintEl = document.getElementById("hint");
   var nextEl = document.getElementById("next");
+  var clearAllEl = document.getElementById("clear-all");
   var settingsBtnEl = document.getElementById("settings-btn");
   var settingsOverlayEl = document.getElementById("settings-overlay");
   var settingsCloseEl = document.getElementById("settings-close");
@@ -262,10 +263,6 @@
         button.disabled = !hasAssignments();
         continue;
       }
-      if (action === "clear-all") {
-        button.disabled = !hasAssignments();
-        continue;
-      }
       letter = button.getAttribute("data-letter");
       button.setAttribute(
         "data-selected",
@@ -273,6 +270,7 @@
       );
       button.disabled = !selectedCipherLetter;
     }
+    clearAllEl.disabled = !hasAssignments();
   }
 
   function hasAssignments() {
@@ -439,19 +437,6 @@
       }
       keyboardEl.appendChild(rowEl);
     }
-    var clearAllButton = document.createElement("button");
-    clearAllButton.type = "button";
-    clearAllButton.className = "keyboard-key keyboard-clear-all";
-    clearAllButton.setAttribute("data-action", "clear-all");
-    clearAllButton.setAttribute("aria-label", "Clear all letters");
-    clearAllButton.textContent = "\u2715 Clear all";
-    clearAllButton.addEventListener("click", function () {
-      assignments = {};
-      renderDecoderGrid();
-      updateKeyboardState();
-      updateHintButton();
-    });
-    keyboardEl.appendChild(clearAllButton);
   }
 
   function showQuote(quote) {
@@ -472,6 +457,7 @@
     document.body.classList.add("has-keyboard");
     hintEl.hidden = false;
     nextEl.hidden = false;
+    clearAllEl.hidden = false;
   }
 
   function loadQuote() {
@@ -482,6 +468,7 @@
     document.body.classList.remove("has-keyboard");
     hintEl.hidden = true;
     nextEl.hidden = true;
+    clearAllEl.hidden = true;
     solvedOverlayEl.hidden = true;
 
     var now = Date.now();
@@ -598,6 +585,12 @@
   });
 
   nextEl.addEventListener("click", loadQuote);
+  clearAllEl.addEventListener("click", function () {
+    assignments = {};
+    renderDecoderGrid();
+    updateKeyboardState();
+    updateHintButton();
+  });
   if (typeof ResizeObserver !== "undefined") {
     new ResizeObserver(function () {
       if (!quoteEl.hidden) wrapOverflowingWords();

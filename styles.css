@@ -431,11 +431,6 @@ body {
   box-shadow: 0 0 0 1px var(--selected), 0 0 10px rgba(0, 229, 255, 0.35);
 }
 
-.keyboard-clear-all {
-  flex: none;
-  width: 100%;
-}
-
 .control-row {
   display: flex;
   justify-content: center;
@@ -458,6 +453,12 @@ body {
   border-radius: 0.2rem;
   cursor: pointer;
   touch-action: manipulation;
+}
+
+.control-btn {
+  width: auto;
+  padding: 0 0.75rem;
+  text-decoration: none;
 }
 
 .icon-btn svg {
@@ -501,25 +502,4 @@ body {
 
 body.has-keyboard {
   padding-bottom: max(13rem, calc(11rem + env(safe-area-inset-bottom)));
-}
-
-.site-footer {
-  position: fixed;
-  bottom: 0.75rem;
-  right: 1rem;
-  z-index: 50;
-}
-
-.github-link {
-  color: var(--muted);
-  font-family: "Georgia", "Times New Roman", serif;
-  font-size: 0.8rem;
-  text-decoration: none;
-  opacity: 0.6;
-}
-
-.github-link:hover,
-.github-link:focus-visible {
-  color: var(--accent);
-  opacity: 1;
 }
