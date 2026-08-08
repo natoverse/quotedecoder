@@ -431,6 +431,11 @@ body {
   box-shadow: 0 0 0 1px var(--selected), 0 0 10px rgba(0, 229, 255, 0.35);
 }
 
+.keyboard-clear-all {
+  flex: none;
+  width: 100%;
+}
+
 .control-row {
   display: flex;
   justify-content: center;
