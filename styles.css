@@ -2,12 +2,12 @@
   color-scheme: dark;
   --bg: #000;
   --bg-accent: #0a1810;
-  --fg: #b4f0b4;
-  --muted: #4daa6b;
+  --fg: #d8ffd8;
+  --muted: #74e996;
   --accent: #00ff41;
   --selected: #00e5ff;
   --panel: rgba(5, 18, 10, 0.96);
-  --line: rgba(0, 255, 65, 0.18);
+  --line: rgba(0, 255, 65, 0.5);
   --accent-rgb: 0, 255, 65;
   --control-bg: rgba(0, 30, 12, 0.9);
   --fill-bg: rgba(0, 20, 8, 0.8);
