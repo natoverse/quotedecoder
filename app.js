@@ -243,6 +243,13 @@
     var selectedPlain = selectedCipherLetter
       ? assignments[selectedCipherLetter] || null
       : null;
+    var usedPlain = {};
+    var key;
+    for (key in assignments) {
+      if (assignments.hasOwnProperty(key)) {
+        usedPlain[assignments[key]] = true;
+      }
+    }
     var buttons = keyboardEl.querySelectorAll(".keyboard-key");
     var i, button, letter, action;
     for (i = 0; i < buttons.length; i++) {
@@ -256,6 +263,10 @@
       button.setAttribute(
         "data-selected",
         selectedPlain && selectedPlain === letter ? "true" : "false"
+      );
+      button.setAttribute(
+        "data-used",
+        usedPlain[letter] ? "true" : "false"
       );
       button.disabled = !selectedCipherLetter;
     }

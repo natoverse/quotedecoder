@@ -446,9 +446,15 @@ body {
   cursor: not-allowed;
 }
 
+.keyboard-key[data-used="true"] {
+  opacity: 0.4;
+  text-shadow: none;
+}
+
 .keyboard-key[data-selected="true"] {
   border-color: var(--selected);
   box-shadow: 0 0 0 1px var(--selected), 0 0 10px rgba(0, 229, 255, 0.35);
+  opacity: 1;
 }
 
 .control-row {
