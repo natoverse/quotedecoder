@@ -446,12 +446,9 @@ body {
 
 .control-row {
   display: flex;
+  justify-content: center;
   gap: 0.5rem;
   margin: 1rem clamp(0.3rem, 1vw, 0.65rem) 10px;
-}
-
-.clear-all {
-  margin-left: auto;
 }
 
 .icon-btn {
