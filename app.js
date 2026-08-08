@@ -23,7 +23,6 @@
   var encodedTextEl = document.getElementById("encoded-text");
   var keyboardEl = document.getElementById("keyboard");
   var hintEl = document.getElementById("hint");
-  var nextEl = document.getElementById("next");
   var clearAllEl = document.getElementById("clear-all");
   var settingsBtnEl = document.getElementById("settings-btn");
   var settingsOverlayEl = document.getElementById("settings-overlay");
@@ -175,7 +174,6 @@
   function showError(message) {
     statusEl.textContent = message;
     statusEl.hidden = false;
-    nextEl.hidden = false;
   }
 
   function isAsciiLetter(ch) {
@@ -456,7 +454,6 @@
     keyboardEl.hidden = false;
     document.body.classList.add("has-keyboard");
     hintEl.hidden = false;
-    nextEl.hidden = false;
     clearAllEl.hidden = false;
   }
 
@@ -467,7 +464,6 @@
     keyboardEl.hidden = true;
     document.body.classList.remove("has-keyboard");
     hintEl.hidden = true;
-    nextEl.hidden = true;
     clearAllEl.hidden = true;
     solvedOverlayEl.hidden = true;
 
@@ -584,7 +580,6 @@
     });
   });
 
-  nextEl.addEventListener("click", loadQuote);
   clearAllEl.addEventListener("click", function () {
     assignments = {};
     renderDecoderGrid();

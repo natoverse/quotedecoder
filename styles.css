@@ -455,12 +455,6 @@ body {
   touch-action: manipulation;
 }
 
-.control-btn {
-  width: auto;
-  padding: 0 0.75rem;
-  text-decoration: none;
-}
-
 .icon-btn svg {
   width: 1.4rem;
   height: 1.4rem;
@@ -469,6 +463,11 @@ body {
   stroke-width: 1.8;
   stroke-linecap: round;
   stroke-linejoin: round;
+}
+
+.github-btn svg {
+  fill: currentColor;
+  stroke: none;
 }
 
 .icon-btn:hover,
@@ -486,18 +485,6 @@ body {
 .icon-btn:disabled {
   opacity: 0.3;
   cursor: not-allowed;
-}
-
-.next {
-  color: var(--accent);
-  background: rgba(var(--accent-rgb), 0.06);
-  border: 1px solid var(--accent);
-  box-shadow: 0 0 16px rgba(var(--accent-rgb), 0.25);
-}
-
-.next:hover,
-.next:focus-visible {
-  background: rgba(var(--accent-rgb), 0.12);
 }
 
 body.has-keyboard {
