@@ -286,6 +286,19 @@ body {
   filter: brightness(1.08);
 }
 
+.settings-github {
+  display: block;
+  margin-top: 1rem;
+  color: var(--muted);
+  font-size: 0.85rem;
+  text-align: center;
+}
+
+.settings-github:hover,
+.settings-github:focus-visible {
+  color: var(--accent);
+}
+
 .status {
   margin: 1rem clamp(0.3rem, 1vw, 0.65rem) 0;
   color: var(--muted);
@@ -433,9 +446,12 @@ body {
 
 .control-row {
   display: flex;
-  justify-content: center;
   gap: 0.5rem;
   margin: 1rem clamp(0.3rem, 1vw, 0.65rem) 10px;
+}
+
+.clear-all {
+  margin-left: auto;
 }
 
 .icon-btn {
@@ -463,11 +479,6 @@ body {
   stroke-width: 1.8;
   stroke-linecap: round;
   stroke-linejoin: round;
-}
-
-.github-btn svg {
-  fill: currentColor;
-  stroke: none;
 }
 
 .icon-btn:hover,
