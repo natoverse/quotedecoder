@@ -236,18 +236,6 @@
     selectedTextPos = -1;
   }
 
-  function updateHintButton() {
-    var i, cipherLetter;
-    for (i = 0; i < puzzleCipherLetters.length; i++) {
-      cipherLetter = puzzleCipherLetters[i];
-      if (!assignments[cipherLetter]) {
-        hintEl.disabled = false;
-        return;
-      }
-    }
-    hintEl.disabled = true;
-  }
-
   function updateKeyboardState() {
     var selectedPlain = selectedCipherLetter
       ? assignments[selectedCipherLetter] || null
@@ -268,7 +256,6 @@
       );
       button.disabled = !selectedCipherLetter;
     }
-    clearAllEl.disabled = !hasAssignments();
   }
 
   function hasAssignments() {
@@ -412,7 +399,6 @@
             advanceSelection();
             renderDecoderGrid();
             updateKeyboardState();
-            updateHintButton();
             checkSolved();
           };
         })(letter));
@@ -429,7 +415,6 @@
           deletePreviousAssignment();
           renderDecoderGrid();
           updateKeyboardState();
-          updateHintButton();
         });
         rowEl.appendChild(button);
       }
@@ -448,7 +433,6 @@
     assignments = {};
     renderDecoderGrid();
     updateKeyboardState();
-    updateHintButton();
     statusEl.hidden = true;
     quoteEl.hidden = false;
     keyboardEl.hidden = false;
@@ -509,7 +493,6 @@
     assignments[pick] = currentCipherInverse[pick];
     renderDecoderGrid();
     updateKeyboardState();
-    updateHintButton();
     checkSolved();
   });
 
@@ -586,7 +569,6 @@
     assignments = {};
     renderDecoderGrid();
     updateKeyboardState();
-    updateHintButton();
   });
   if (typeof ResizeObserver !== "undefined") {
     new ResizeObserver(function () {
