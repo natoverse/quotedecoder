@@ -23,6 +23,7 @@
   var encodedTextEl = document.getElementById("encoded-text");
   var keyboardEl = document.getElementById("keyboard");
   var hintEl = document.getElementById("hint");
+  var refreshEl = document.getElementById("refresh");
   var clearAllEl = document.getElementById("clear-all");
   var settingsBtnEl = document.getElementById("settings-btn");
   var settingsOverlayEl = document.getElementById("settings-overlay");
@@ -452,6 +453,7 @@
     keyboardEl.hidden = false;
     document.body.classList.add("has-keyboard");
     hintEl.hidden = false;
+    refreshEl.hidden = false;
     clearAllEl.hidden = false;
   }
 
@@ -462,6 +464,7 @@
     keyboardEl.hidden = true;
     document.body.classList.remove("has-keyboard");
     hintEl.hidden = true;
+    refreshEl.hidden = true;
     clearAllEl.hidden = true;
     solvedOverlayEl.hidden = true;
 
@@ -595,6 +598,10 @@
       applyTheme(settings.theme);
       saveSettings();
     });
+  });
+
+  refreshEl.addEventListener("click", function () {
+    loadQuote();
   });
 
   clearAllEl.addEventListener("click", function () {
