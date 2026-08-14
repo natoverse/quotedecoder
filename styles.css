@@ -402,6 +402,14 @@ body {
   border-left-color: var(--accent);
 }
 
+:root[data-theme="glitter"] .decoder-cell--wrap-end .decoder-fill {
+  border-right-width: 3px;
+}
+
+:root[data-theme="glitter"] .decoder-cell--wrap-start .decoder-fill {
+  border-left-width: 3px;
+}
+
 .decoder-encoded {
   color: var(--muted);
   font-size: 0.9rem;
