@@ -322,14 +322,16 @@
       }
       if (words[i].scrollWidth > containerWidth) {
         words[i].classList.add("decoder-word--break");
-        previousTop = cells[0].offsetTop;
-        for (j = 1; j < cells.length; j++) {
-          cellTop = cells[j].offsetTop;
-          if (cellTop > previousTop) {
-            cells[j - 1].classList.add("decoder-cell--wrap-end");
-            cells[j].classList.add("decoder-cell--wrap-start");
+        if (cells.length) {
+          previousTop = cells[0].offsetTop;
+          for (j = 1; j < cells.length; j++) {
+            cellTop = cells[j].offsetTop;
+            if (cellTop > previousTop) {
+              cells[j - 1].classList.add("decoder-cell--wrap-end");
+              cells[j].classList.add("decoder-cell--wrap-start");
+            }
+            previousTop = cellTop;
           }
-          previousTop = cellTop;
         }
       }
     }
