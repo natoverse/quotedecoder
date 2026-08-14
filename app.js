@@ -313,10 +313,26 @@
   function wrapOverflowingWords() {
     var containerWidth = encodedTextEl.clientWidth;
     var words = encodedTextEl.querySelectorAll(".decoder-word");
-    var i;
+    var i, j, cells, previousTop, cellTop;
     for (i = 0; i < words.length; i++) {
+      words[i].classList.remove("decoder-word--break");
+      cells = words[i].querySelectorAll(".decoder-cell");
+      for (j = 0; j < cells.length; j++) {
+        cells[j].classList.remove("decoder-cell--wrap-end", "decoder-cell--wrap-start");
+      }
       if (words[i].scrollWidth > containerWidth) {
         words[i].classList.add("decoder-word--break");
+        if (cells.length) {
+          previousTop = cells[0].offsetTop;
+          for (j = 1; j < cells.length; j++) {
+            cellTop = cells[j].offsetTop;
+            if (cellTop > previousTop) {
+              cells[j - 1].classList.add("decoder-cell--wrap-end");
+              cells[j].classList.add("decoder-cell--wrap-start");
+            }
+            previousTop = cellTop;
+          }
+        }
       }
     }
   }

@@ -350,9 +350,11 @@ body {
 
 .decoder-word {
   display: inline-flex;
+  flex: 0 0 auto;
   flex-wrap: nowrap;
   align-items: flex-start;
   gap: 0.25rem;
+  max-width: 100%;
 }
 
 .decoder-word--break {
@@ -390,6 +392,14 @@ body {
   border-color: #ff0055;
   color: #ff0055;
   box-shadow: 0 0 0 1px #ff0055;
+}
+
+.decoder-cell--wrap-end .decoder-fill {
+  border-right-color: var(--accent);
+}
+
+.decoder-cell--wrap-start .decoder-fill {
+  border-left-color: var(--accent);
 }
 
 .decoder-encoded {
