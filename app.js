@@ -245,7 +245,11 @@
     return fetch(new URL("quotes/all/" + bucketId + ".json", document.baseURI), {
       cache: "no-store"
     }).then(function (response) {
-      if (!response.ok) throw new Error("HTTP " + response.status);
+      if (!response.ok) {
+        var error = new Error("HTTP " + response.status);
+        error.status = response.status;
+        throw error;
+      }
       return response.json();
     }).then(function (quotes) {
       if (!Array.isArray(quotes) || quotes.length === 0) {
@@ -330,7 +334,7 @@
   }
 
   // Pick a bucket id not seen within the window; if all are exhausted, reset.
-  function pickBucket(seen) {
+  function pickBucket(seen, excluded) {
     var seenIds = {};
     seen.forEach(function (entry) {
       seenIds[entry.id] = true;
@@ -338,13 +342,16 @@
 
     var available = [];
     for (var id = 1; id <= N_BUCKETS; id++) {
-      if (!seenIds[id]) available.push(id);
+      if (!seenIds[id] && (!excluded || !excluded[id])) available.push(id);
     }
     if (available.length === 0) {
       // Every bucket seen within the window: start a fresh cycle.
       seen.length = 0;
-      for (var j = 1; j <= N_BUCKETS; j++) available.push(j);
+      for (var j = 1; j <= N_BUCKETS; j++) {
+        if (!excluded || !excluded[j]) available.push(j);
+      }
     }
+    if (available.length === 0) return null;
     return available[Math.floor(Math.random() * available.length)];
   }
 
@@ -677,14 +684,25 @@
   function loadOnlineQuote() {
     var now = Date.now();
     var seen = loadSeen(now);
-    var bucketId = pickBucket(seen);
+    var attempted = {};
 
-    seen.push({ id: bucketId, ts: now });
-    writeCookie(COOKIE_NAME, JSON.stringify(seen));
+    function tryNextBucket(lastError) {
+      var bucketId = pickBucket(seen, attempted);
+      if (bucketId === null) return Promise.reject(lastError);
 
-    return fetchBucket(bucketId).then(function (quotes) {
-      return quotes[Math.floor(Math.random() * quotes.length)];
-    });
+      attempted[bucketId] = true;
+      seen.push({ id: bucketId, ts: now });
+      writeCookie(COOKIE_NAME, JSON.stringify(seen));
+
+      return fetchBucket(bucketId).then(function (quotes) {
+        return quotes[Math.floor(Math.random() * quotes.length)];
+      }).catch(function (error) {
+        if (error.status === 404) return tryNextBucket(error);
+        throw error;
+      });
+    }
+
+    return tryNextBucket();
   }
 
   function loadQuote() {
