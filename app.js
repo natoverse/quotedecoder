@@ -16,8 +16,9 @@
   var COOKIE_NAME = "qd_seen";
   var SETTINGS_KEY = "qd_settings";
   var OFFLINE_DB_NAME = "qd_offline";
-  var OFFLINE_DB_VERSION = 1;
+  var OFFLINE_DB_VERSION = 2;
   var OFFLINE_QUEUE_SIZE = 100;
+  var NEW_ISSUE_URL = "https://github.com/natoverse/quotedecoder/issues/new";
   var WINDOW_DAYS = 30;
   var WINDOW_MS = WINDOW_DAYS * 24 * 60 * 60 * 1000;
   var offlineDbPromise = null;
@@ -33,6 +34,7 @@
   var settingsBtnEl = document.getElementById("settings-btn");
   var settingsOverlayEl = document.getElementById("settings-overlay");
   var settingsCloseEl = document.getElementById("settings-close");
+  var removeCurrentQuoteEl = document.getElementById("remove-current-quote");
   var helpBtnEl = document.getElementById("help-btn");
   var helpOverlayEl = document.getElementById("help-overlay");
   var helpCloseEl = document.getElementById("help-close");
@@ -104,7 +106,7 @@
 
     offlineDbPromise = new Promise(function (resolve, reject) {
       var request = indexedDB.open(OFFLINE_DB_NAME, OFFLINE_DB_VERSION);
-      request.onupgradeneeded = function () {
+      request.onupgradeneeded = function (event) {
         var db = request.result;
         if (!db.objectStoreNames.contains("queue")) {
           var queue = db.createObjectStore("queue", {
@@ -115,6 +117,9 @@
         }
         if (!db.objectStoreNames.contains("played")) {
           db.createObjectStore("played", { keyPath: "fingerprint" });
+        }
+        if (event.oldVersion > 0 && event.oldVersion < 2) {
+          request.transaction.objectStore("queue").clear();
         }
       };
       request.onsuccess = function () {
@@ -246,7 +251,10 @@
       if (!Array.isArray(quotes) || quotes.length === 0) {
         throw new Error("Empty bucket");
       }
-      return quotes;
+      return quotes.map(function (quote, index) {
+        quote.number = index * N_BUCKETS + bucketId;
+        return quote;
+      });
     });
   }
 
@@ -752,6 +760,11 @@
     for (i = 0; i < themeOptionEls.length; i++) {
       themeOptionEls[i].checked = themeOptionEls[i].value === settings.theme;
     }
+    var issueTitle = "Remove quote #" + currentQuote.number;
+    var issueBody = "Current quote number: " + currentQuote.number;
+    removeCurrentQuoteEl.href = NEW_ISSUE_URL +
+      "?title=" + encodeURIComponent(issueTitle) +
+      "&body=" + encodeURIComponent(issueBody);
     settingsOverlayEl.hidden = false;
     settingsBtnEl.setAttribute("aria-expanded", "true");
     settingsCloseEl.focus();
