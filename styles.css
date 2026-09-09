@@ -307,6 +307,10 @@ body {
   background: rgba(var(--accent-rgb), 0.12);
 }
 
+.settings-remove[hidden] {
+  display: none;
+}
+
 .settings-github {
   display: block;
   margin-top: 1rem;

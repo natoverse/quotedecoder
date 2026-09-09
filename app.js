@@ -760,11 +760,17 @@
     for (i = 0; i < themeOptionEls.length; i++) {
       themeOptionEls[i].checked = themeOptionEls[i].value === settings.theme;
     }
-    var issueTitle = "Remove quote #" + currentQuote.number;
-    var issueBody = "Current quote number: " + currentQuote.number;
-    removeCurrentQuoteEl.href = NEW_ISSUE_URL +
-      "?title=" + encodeURIComponent(issueTitle) +
-      "&body=" + encodeURIComponent(issueBody);
+    if (currentQuote && typeof currentQuote.number === "number") {
+      var issueTitle = "Remove quote #" + currentQuote.number;
+      var issueBody = "Current quote number: " + currentQuote.number;
+      removeCurrentQuoteEl.href = NEW_ISSUE_URL +
+        "?title=" + encodeURIComponent(issueTitle) +
+        "&body=" + encodeURIComponent(issueBody);
+      removeCurrentQuoteEl.hidden = false;
+    } else {
+      removeCurrentQuoteEl.removeAttribute("href");
+      removeCurrentQuoteEl.hidden = true;
+    }
     settingsOverlayEl.hidden = false;
     settingsBtnEl.setAttribute("aria-expanded", "true");
     settingsCloseEl.focus();
