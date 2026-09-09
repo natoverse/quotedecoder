@@ -286,6 +286,31 @@ body {
   filter: brightness(1.08);
 }
 
+.settings-remove {
+  display: block;
+  width: 100%;
+  margin-bottom: 0.75rem;
+  padding: 0.6rem;
+  color: var(--accent);
+  background: transparent;
+  border: 1px solid var(--accent);
+  border-radius: 0.2rem;
+  font-size: 0.95rem;
+  text-align: center;
+  text-decoration: none;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.settings-remove:hover,
+.settings-remove:focus-visible {
+  background: rgba(var(--accent-rgb), 0.12);
+}
+
+.settings-remove[hidden] {
+  display: none;
+}
+
 .settings-github {
   display: block;
   margin-top: 1rem;
