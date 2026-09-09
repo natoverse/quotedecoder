@@ -15,8 +15,13 @@
   var N_BUCKETS = 100;
   var COOKIE_NAME = "qd_seen";
   var SETTINGS_KEY = "qd_settings";
+  var OFFLINE_DB_NAME = "qd_offline";
+  var OFFLINE_DB_VERSION = 1;
+  var OFFLINE_QUEUE_SIZE = 100;
   var WINDOW_DAYS = 30;
   var WINDOW_MS = WINDOW_DAYS * 24 * 60 * 60 * 1000;
+  var offlineDbPromise = null;
+  var offlineSyncPromise = null;
 
   var statusEl = document.getElementById("status");
   var quoteEl = document.getElementById("quote");
@@ -89,6 +94,194 @@
     try {
       localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
     } catch (e) {}
+  }
+
+  function openOfflineDb() {
+    if (!("indexedDB" in window)) {
+      return Promise.reject(new Error("IndexedDB unavailable"));
+    }
+    if (offlineDbPromise) return offlineDbPromise;
+
+    offlineDbPromise = new Promise(function (resolve, reject) {
+      var request = indexedDB.open(OFFLINE_DB_NAME, OFFLINE_DB_VERSION);
+      request.onupgradeneeded = function () {
+        var db = request.result;
+        if (!db.objectStoreNames.contains("queue")) {
+          var queue = db.createObjectStore("queue", {
+            keyPath: "id",
+            autoIncrement: true
+          });
+          queue.createIndex("fingerprint", "fingerprint", { unique: true });
+        }
+        if (!db.objectStoreNames.contains("played")) {
+          db.createObjectStore("played", { keyPath: "fingerprint" });
+        }
+      };
+      request.onsuccess = function () {
+        resolve(request.result);
+      };
+      request.onerror = function () {
+        offlineDbPromise = null;
+        reject(request.error);
+      };
+    });
+    return offlineDbPromise;
+  }
+
+  function quoteFingerprint(quote) {
+    return quote.quote + "\u0000" + quote.author;
+  }
+
+  function takeOfflineQuote() {
+    return openOfflineDb().then(function (db) {
+      return new Promise(function (resolve, reject) {
+        var quote = null;
+        var tx = db.transaction(["queue", "played"], "readwrite");
+        var queue = tx.objectStore("queue");
+        var cursorRequest = queue.openCursor();
+        cursorRequest.onsuccess = function () {
+          var cursor = cursorRequest.result;
+          if (!cursor) return;
+          quote = cursor.value.quote;
+          queue.delete(cursor.primaryKey);
+          tx.objectStore("played").put({
+            fingerprint: cursor.value.fingerprint,
+            ts: Date.now()
+          });
+        };
+        tx.oncomplete = function () {
+          resolve(quote);
+        };
+        tx.onerror = function () {
+          reject(tx.error);
+        };
+      });
+    });
+  }
+
+  function rememberPlayedQuote(quote) {
+    return openOfflineDb().then(function (db) {
+      return new Promise(function (resolve, reject) {
+        var tx = db.transaction("played", "readwrite");
+        tx.objectStore("played").put({
+          fingerprint: quoteFingerprint(quote),
+          ts: Date.now()
+        });
+        tx.oncomplete = function () {
+          resolve(quote);
+        };
+        tx.onerror = function () {
+          reject(tx.error);
+        };
+      });
+    }).catch(function () {
+      return quote;
+    });
+  }
+
+  function loadOfflineState() {
+    return openOfflineDb().then(function (db) {
+      return new Promise(function (resolve, reject) {
+        var now = Date.now();
+        var fingerprints = {};
+        var count = 0;
+        var tx = db.transaction(["queue", "played"], "readwrite");
+        var queueRequest = tx.objectStore("queue").openCursor();
+        queueRequest.onsuccess = function () {
+          var cursor = queueRequest.result;
+          if (!cursor) return;
+          fingerprints[cursor.value.fingerprint] = true;
+          count++;
+          cursor.continue();
+        };
+        var playedRequest = tx.objectStore("played").openCursor();
+        playedRequest.onsuccess = function () {
+          var cursor = playedRequest.result;
+          if (!cursor) return;
+          if (now - cursor.value.ts >= WINDOW_MS) {
+            cursor.delete();
+          } else {
+            fingerprints[cursor.value.fingerprint] = true;
+          }
+          cursor.continue();
+        };
+        tx.oncomplete = function () {
+          resolve({ count: count, fingerprints: fingerprints });
+        };
+        tx.onerror = function () {
+          reject(tx.error);
+        };
+      });
+    });
+  }
+
+  function cacheOfflineQuote(quote, fingerprints) {
+    var fingerprint = quoteFingerprint(quote);
+    if (fingerprints[fingerprint]) return Promise.resolve(false);
+    return openOfflineDb().then(function (db) {
+      return new Promise(function (resolve, reject) {
+        var tx = db.transaction("queue", "readwrite");
+        tx.objectStore("queue").add({
+          fingerprint: fingerprint,
+          quote: quote
+        });
+        tx.oncomplete = function () {
+          fingerprints[fingerprint] = true;
+          resolve(true);
+        };
+        tx.onerror = function () {
+          reject(tx.error);
+        };
+      });
+    });
+  }
+
+  function fetchBucket(bucketId) {
+    return fetch(new URL("quotes/all/" + bucketId + ".json", document.baseURI), {
+      cache: "no-store"
+    }).then(function (response) {
+      if (!response.ok) throw new Error("HTTP " + response.status);
+      return response.json();
+    }).then(function (quotes) {
+      if (!Array.isArray(quotes) || quotes.length === 0) {
+        throw new Error("Empty bucket");
+      }
+      return quotes;
+    });
+  }
+
+  function pickUnplayedQuote(quotes, fingerprints) {
+    var start = Math.floor(Math.random() * quotes.length);
+    for (var i = 0; i < quotes.length; i++) {
+      var quote = quotes[(start + i) % quotes.length];
+      if (!fingerprints[quoteFingerprint(quote)]) return quote;
+    }
+    return null;
+  }
+
+  function syncOfflineQuotes() {
+    if (offlineSyncPromise || navigator.onLine === false) {
+      return offlineSyncPromise || Promise.resolve();
+    }
+    offlineSyncPromise = loadOfflineState().then(function (state) {
+      function fillQueue() {
+        if (state.count >= OFFLINE_QUEUE_SIZE) return;
+        var bucketId = Math.floor(Math.random() * N_BUCKETS) + 1;
+        return fetchBucket(bucketId).then(function (quotes) {
+          var quote = pickUnplayedQuote(quotes, state.fingerprints);
+          if (!quote) return;
+          return cacheOfflineQuote(quote, state.fingerprints).then(function (added) {
+            if (added) state.count++;
+          });
+        }).then(fillQueue);
+      }
+      return fillQueue();
+    }).catch(function () {
+      // Offline syncing is deliberately invisible and will retry next visit.
+    }).then(function () {
+      offlineSyncPromise = null;
+    });
+    return offlineSyncPromise;
   }
 
   function applyTheme(theme) {
@@ -473,6 +666,19 @@
     clearAllEl.hidden = false;
   }
 
+  function loadOnlineQuote() {
+    var now = Date.now();
+    var seen = loadSeen(now);
+    var bucketId = pickBucket(seen);
+
+    seen.push({ id: bucketId, ts: now });
+    writeCookie(COOKIE_NAME, JSON.stringify(seen));
+
+    return fetchBucket(bucketId).then(function (quotes) {
+      return quotes[Math.floor(Math.random() * quotes.length)];
+    });
+  }
+
   function loadQuote() {
     statusEl.textContent = "Loading a quote\u2026";
     statusEl.hidden = false;
@@ -484,28 +690,17 @@
     clearAllEl.hidden = true;
     solvedOverlayEl.hidden = true;
 
-    var now = Date.now();
-    var seen = loadSeen(now);
-    var bucketId = pickBucket(seen);
-
-    seen.push({ id: bucketId, ts: now });
-    writeCookie(COOKIE_NAME, JSON.stringify(seen));
-
-    fetch(new URL("quotes/all/" + bucketId + ".json", document.baseURI), {
-      cache: "no-store"
-    })
-      .then(function (response) {
-        if (!response.ok) {
-          throw new Error("HTTP " + response.status);
-        }
-        return response.json();
+    takeOfflineQuote()
+      .catch(function () {
+        return null;
       })
-      .then(function (quotes) {
-        if (!Array.isArray(quotes) || quotes.length === 0) {
-          throw new Error("Empty bucket");
-        }
-        var quote = quotes[Math.floor(Math.random() * quotes.length)];
+      .then(function (quote) {
+        if (quote) return quote;
+        return loadOnlineQuote().then(rememberPlayedQuote);
+      })
+      .then(function (quote) {
         showQuote(quote);
+        syncOfflineQuotes();
       })
       .catch(function () {
         showError("Sorry, we couldn't load a quote. Please try again.");
@@ -634,4 +829,7 @@
   loadSettings();
   applyTheme(settings.theme);
   loadQuote();
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("service-worker.js").catch(function () {});
+  }
 })();

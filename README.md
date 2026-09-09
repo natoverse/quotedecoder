@@ -20,10 +20,14 @@ Each quote is `{ "quote", "author", "tags": [...] }`.
 ## Web app
 
 `index.html` (with `styles.css` and `app.js`) is a static, mobile-friendly page
-that picks a random bucket from `quotes/all/`, then a random quote in it, and
-displays it. A 30-day cookie of seen bucket IDs avoids repeats within that
-window. The `.github/workflows/deploy-pages.yml` workflow publishes the site to
-GitHub Pages on every push to `main`.
+that picks quotes by choosing a random bucket from `quotes/all/`, then a random
+quote in it. The `.github/workflows/deploy-pages.yml` workflow publishes the
+site to GitHub Pages on every push to `main`.
+
+The app also keeps 100 unplayed random quotes in browser storage and replenishes
+them silently in the background. A service worker caches the app shell, so the
+site and its refresh button continue to work without a network connection after
+the first online visit.
 
 ## Scripts
 
