@@ -159,6 +159,26 @@
     });
   }
 
+  function rememberPlayedQuote(quote) {
+    return openOfflineDb().then(function (db) {
+      return new Promise(function (resolve, reject) {
+        var tx = db.transaction("played", "readwrite");
+        tx.objectStore("played").put({
+          fingerprint: quoteFingerprint(quote),
+          ts: Date.now()
+        });
+        tx.oncomplete = function () {
+          resolve(quote);
+        };
+        tx.onerror = function () {
+          reject(tx.error);
+        };
+      });
+    }).catch(function () {
+      return quote;
+    });
+  }
+
   function loadOfflineState() {
     return openOfflineDb().then(function (db) {
       return new Promise(function (resolve, reject) {
@@ -676,7 +696,7 @@
       })
       .then(function (quote) {
         if (quote) return quote;
-        return loadOnlineQuote();
+        return loadOnlineQuote().then(rememberPlayedQuote);
       })
       .then(function (quote) {
         showQuote(quote);
