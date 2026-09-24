@@ -31,6 +31,8 @@
   var hintEl = document.getElementById("hint");
   var refreshEl = document.getElementById("refresh");
   var clearAllEl = document.getElementById("clear-all");
+  var copyQuoteEl = document.getElementById("copy-quote");
+  var copyFeedbackEl = document.getElementById("copy-feedback");
   var settingsBtnEl = document.getElementById("settings-btn");
   var settingsOverlayEl = document.getElementById("settings-overlay");
   var settingsCloseEl = document.getElementById("settings-close");
@@ -679,6 +681,8 @@
     hintEl.hidden = false;
     refreshEl.hidden = false;
     clearAllEl.hidden = false;
+    copyQuoteEl.hidden = false;
+    copyQuoteEl.disabled = true;
   }
 
   function loadOnlineQuote() {
@@ -714,6 +718,8 @@
     hintEl.hidden = true;
     refreshEl.hidden = true;
     clearAllEl.hidden = true;
+    copyQuoteEl.hidden = true;
+    copyQuoteEl.disabled = true;
     solvedOverlayEl.hidden = true;
 
     takeOfflineQuote()
@@ -758,7 +764,43 @@
         return;
       }
     }
+    copyQuoteEl.disabled = false;
     openSolvedPanel();
+  }
+
+  function copyWithFallback(text) {
+    var textArea = document.createElement("textarea");
+    textArea.value = text;
+    textArea.setAttribute("readonly", "");
+    textArea.style.position = "fixed";
+    textArea.style.opacity = "0";
+    document.body.appendChild(textArea);
+    textArea.select();
+    try {
+      if (!document.execCommand("copy")) throw new Error("Copy failed");
+    } finally {
+      document.body.removeChild(textArea);
+    }
+  }
+
+  function copySolvedQuote() {
+    if (copyQuoteEl.disabled || !currentQuote) return;
+    var text = "\u201c" + currentQuote.quote + "\u201d\n\u2014 " + currentQuote.author;
+    var copyPromise;
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      copyPromise = navigator.clipboard.writeText(text).catch(function () {
+        copyWithFallback(text);
+      });
+    } else {
+      copyPromise = Promise.resolve().then(function () {
+        copyWithFallback(text);
+      });
+    }
+    copyPromise.then(function () {
+      copyFeedbackEl.textContent = "Quote copied to clipboard.";
+    }).catch(function () {
+      copyFeedbackEl.textContent = "Unable to copy quote.";
+    });
   }
 
   function openSolvedPanel() {
@@ -813,6 +855,7 @@
   }
 
   solvedCloseEl.addEventListener("click", closeSolvedPanel);
+  copyQuoteEl.addEventListener("click", copySolvedQuote);
   solvedOverlayEl.addEventListener("click", function (e) {
     if (e.target === solvedOverlayEl) closeSolvedPanel();
   });
