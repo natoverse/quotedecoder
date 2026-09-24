@@ -771,6 +771,7 @@
   }
 
   function copyWithFallback(text) {
+    var previouslyFocused = document.activeElement;
     var textArea = document.createElement("textarea");
     textArea.value = text;
     textArea.setAttribute("readonly", "");
@@ -782,6 +783,7 @@
       if (!document.execCommand("copy")) throw new Error("Copy failed");
     } finally {
       document.body.removeChild(textArea);
+      if (previouslyFocused && previouslyFocused.focus) previouslyFocused.focus();
     }
   }
 
