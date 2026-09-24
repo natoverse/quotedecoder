@@ -785,6 +785,12 @@
     }
   }
 
+  function announceCopyFeedback(message) {
+    window.setTimeout(function () {
+      copyFeedbackEl.textContent = message;
+    }, 0);
+  }
+
   function copySolvedQuote() {
     if (copyQuoteEl.disabled || !currentQuote) return;
     var text = "\u201c" + currentQuote.quote + "\u201d\n\u2014 " + currentQuote.author;
@@ -803,9 +809,9 @@
       }
     }
     copyPromise.then(function () {
-      copyFeedbackEl.textContent = "Quote copied to clipboard.";
+      announceCopyFeedback("Quote copied to clipboard.");
     }).catch(function () {
-      copyFeedbackEl.textContent = "Unable to copy quote.";
+      announceCopyFeedback("Unable to copy quote.");
     });
   }
 
