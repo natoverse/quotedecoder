@@ -683,6 +683,7 @@
     clearAllEl.hidden = false;
     copyQuoteEl.hidden = false;
     copyQuoteEl.disabled = true;
+    copyFeedbackEl.textContent = "";
   }
 
   function loadOnlineQuote() {
@@ -720,6 +721,7 @@
     clearAllEl.hidden = true;
     copyQuoteEl.hidden = true;
     copyQuoteEl.disabled = true;
+    copyFeedbackEl.textContent = "";
     solvedOverlayEl.hidden = true;
 
     takeOfflineQuote()
@@ -787,14 +789,18 @@
     if (copyQuoteEl.disabled || !currentQuote) return;
     var text = "\u201c" + currentQuote.quote + "\u201d\n\u2014 " + currentQuote.author;
     var copyPromise;
+    copyFeedbackEl.textContent = "";
     if (navigator.clipboard && navigator.clipboard.writeText) {
       copyPromise = navigator.clipboard.writeText(text).catch(function () {
         copyWithFallback(text);
       });
     } else {
-      copyPromise = Promise.resolve().then(function () {
+      try {
         copyWithFallback(text);
-      });
+        copyPromise = Promise.resolve();
+      } catch (error) {
+        copyPromise = Promise.reject(error);
+      }
     }
     copyPromise.then(function () {
       copyFeedbackEl.textContent = "Quote copied to clipboard.";
