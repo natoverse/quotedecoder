@@ -31,6 +31,8 @@
   var hintEl = document.getElementById("hint");
   var refreshEl = document.getElementById("refresh");
   var clearAllEl = document.getElementById("clear-all");
+  var copyQuoteEl = document.getElementById("copy-quote");
+  var copyFeedbackEl = document.getElementById("copy-feedback");
   var settingsBtnEl = document.getElementById("settings-btn");
   var settingsOverlayEl = document.getElementById("settings-overlay");
   var settingsCloseEl = document.getElementById("settings-close");
@@ -679,6 +681,9 @@
     hintEl.hidden = false;
     refreshEl.hidden = false;
     clearAllEl.hidden = false;
+    copyQuoteEl.hidden = false;
+    copyQuoteEl.disabled = true;
+    copyFeedbackEl.textContent = "";
   }
 
   function loadOnlineQuote() {
@@ -714,6 +719,9 @@
     hintEl.hidden = true;
     refreshEl.hidden = true;
     clearAllEl.hidden = true;
+    copyQuoteEl.hidden = true;
+    copyQuoteEl.disabled = true;
+    copyFeedbackEl.textContent = "";
     solvedOverlayEl.hidden = true;
 
     takeOfflineQuote()
@@ -758,7 +766,57 @@
         return;
       }
     }
+    copyQuoteEl.disabled = false;
     openSolvedPanel();
+  }
+
+  function copyWithFallback(text) {
+    var previouslyFocused = document.activeElement;
+    var textArea = document.createElement("textarea");
+    textArea.value = text;
+    textArea.setAttribute("readonly", "");
+    textArea.style.position = "fixed";
+    textArea.style.top = "0";
+    textArea.style.left = "0";
+    textArea.style.opacity = "0";
+    document.body.appendChild(textArea);
+    textArea.select();
+    try {
+      if (!document.execCommand("copy")) throw new Error("Copy failed");
+    } finally {
+      document.body.removeChild(textArea);
+      if (previouslyFocused && previouslyFocused.focus) previouslyFocused.focus();
+    }
+  }
+
+  function announceCopyFeedback(message) {
+    window.setTimeout(function () {
+      copyFeedbackEl.textContent = message;
+    }, 0);
+  }
+
+  function copySolvedQuote() {
+    if (copyQuoteEl.disabled || !currentQuote) return;
+    var text = "\u201c" + currentQuote.quote + "\u201d\n\u2014 " + currentQuote.author;
+    var copyPromise;
+    copyFeedbackEl.textContent = "";
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      copyPromise = navigator.clipboard.writeText(text).catch(function () {
+        copyWithFallback(text);
+      });
+    } else {
+      try {
+        copyWithFallback(text);
+        copyPromise = Promise.resolve();
+      } catch (error) {
+        copyPromise = Promise.reject(error);
+      }
+    }
+    copyPromise.then(function () {
+      announceCopyFeedback("Quote copied to clipboard.");
+    }).catch(function () {
+      announceCopyFeedback("Unable to copy quote.");
+    });
   }
 
   function openSolvedPanel() {
@@ -813,6 +871,7 @@
   }
 
   solvedCloseEl.addEventListener("click", closeSolvedPanel);
+  copyQuoteEl.addEventListener("click", copySolvedQuote);
   solvedOverlayEl.addEventListener("click", function (e) {
     if (e.target === solvedOverlayEl) closeSolvedPanel();
   });
