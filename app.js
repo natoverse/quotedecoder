@@ -776,6 +776,8 @@
     textArea.value = text;
     textArea.setAttribute("readonly", "");
     textArea.style.position = "fixed";
+    textArea.style.top = "0";
+    textArea.style.left = "0";
     textArea.style.opacity = "0";
     document.body.appendChild(textArea);
     textArea.select();
