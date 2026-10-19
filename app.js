@@ -13,6 +13,7 @@
   "use strict";
 
   var N_BUCKETS = 100;
+  var MAX_QUOTE_ATTEMPTS = 5;
   var COOKIE_NAME = "qd_seen";
   var SETTINGS_KEY = "qd_settings";
   var OFFLINE_DB_NAME = "qd_offline";
@@ -257,18 +258,52 @@
       if (!Array.isArray(quotes) || quotes.length === 0) {
         throw new Error("Empty bucket");
       }
-      return quotes.map(function (quote, index) {
-        quote.number = index * N_BUCKETS + bucketId;
-        return quote;
-      });
+      return quotes;
     });
   }
 
-  function pickUnplayedQuote(quotes, fingerprints) {
+  function fetchRandomQuote(seen, onAttempt, fingerprints) {
+    var attempted = {};
+    var attempts = 0;
+
+    function tryNextQuote(lastError) {
+      if (attempts >= MAX_QUOTE_ATTEMPTS) return Promise.reject(lastError);
+      var bucketId = pickBucket(seen, attempted);
+      if (bucketId === null) return Promise.reject(lastError);
+
+      attempted[bucketId] = true;
+      attempts++;
+      if (onAttempt) onAttempt(bucketId);
+      return fetchBucket(bucketId).then(function (quotes) {
+        var index = pickQuoteIndex(quotes, fingerprints);
+        if (index === null) throw new Error("No unplayed quotes");
+        var number = index * N_BUCKETS + bucketId;
+        var quote = quotes[index];
+        if (quote == null) {
+          var error = new Error("Quote #" + number + " not found");
+          error.status = 404;
+          throw error;
+        }
+        quote.number = number;
+        return quote;
+      }).catch(function (error) {
+        if (error.status === 404) return tryNextQuote(error);
+        throw error;
+      });
+    }
+
+    return tryNextQuote();
+  }
+
+  function pickQuoteIndex(quotes, fingerprints) {
     var start = Math.floor(Math.random() * quotes.length);
     for (var i = 0; i < quotes.length; i++) {
-      var quote = quotes[(start + i) % quotes.length];
-      if (!fingerprints[quoteFingerprint(quote)]) return quote;
+      var index = (start + i) % quotes.length;
+      var quote = quotes[index];
+      // Keep removed slots selectable so a missing number counts as an attempt.
+      if (quote == null || !fingerprints || !fingerprints[quoteFingerprint(quote)]) {
+        return index;
+      }
     }
     return null;
   }
@@ -280,10 +315,7 @@
     offlineSyncPromise = loadOfflineState().then(function (state) {
       function fillQueue() {
         if (state.count >= OFFLINE_QUEUE_SIZE) return;
-        var bucketId = Math.floor(Math.random() * N_BUCKETS) + 1;
-        return fetchBucket(bucketId).then(function (quotes) {
-          var quote = pickUnplayedQuote(quotes, state.fingerprints);
-          if (!quote) return;
+        return fetchRandomQuote([], null, state.fingerprints).then(function (quote) {
           return cacheOfflineQuote(quote, state.fingerprints).then(function (added) {
             if (added) state.count++;
           });
@@ -689,25 +721,10 @@
   function loadOnlineQuote() {
     var now = Date.now();
     var seen = loadSeen(now);
-    var attempted = {};
-
-    function tryNextBucket(lastError) {
-      var bucketId = pickBucket(seen, attempted);
-      if (bucketId === null) return Promise.reject(lastError);
-
-      attempted[bucketId] = true;
+    return fetchRandomQuote(seen, function (bucketId) {
       seen.push({ id: bucketId, ts: now });
       writeCookie(COOKIE_NAME, JSON.stringify(seen));
-
-      return fetchBucket(bucketId).then(function (quotes) {
-        return quotes[Math.floor(Math.random() * quotes.length)];
-      }).catch(function (error) {
-        if (error.status === 404) return tryNextBucket(error);
-        throw error;
-      });
-    }
-
-    return tryNextBucket();
+    });
   }
 
   function loadQuote() {
@@ -838,10 +855,14 @@
     }
     if (currentQuote && typeof currentQuote.number === "number") {
       var issueTitle = "Remove quote #" + currentQuote.number;
-      var issueBody = "Current quote number: " + currentQuote.number;
+      var removalRequest = JSON.stringify({
+        number: currentQuote.number,
+        quote: currentQuote.quote,
+        author: currentQuote.author
+      }, null, 2);
       removeCurrentQuoteEl.href = NEW_ISSUE_URL +
-        "?title=" + encodeURIComponent(issueTitle) +
-        "&body=" + encodeURIComponent(issueBody);
+        "?template=remove-quote.yml&title=" + encodeURIComponent(issueTitle) +
+        "&request=" + encodeURIComponent(removalRequest);
       removeCurrentQuoteEl.hidden = false;
     } else {
       removeCurrentQuoteEl.removeAttribute("href");
