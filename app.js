@@ -13,6 +13,7 @@
   "use strict";
 
   var N_BUCKETS = 100;
+  var MAX_QUOTE_ATTEMPTS = 5;
   var COOKIE_NAME = "qd_seen";
   var SETTINGS_KEY = "qd_settings";
   var OFFLINE_DB_NAME = "qd_offline";
@@ -264,6 +265,28 @@
     });
   }
 
+  function fetchRandomBucket(seen) {
+    var attempted = {};
+    var attempts = 0;
+
+    function tryNextBucket(lastError) {
+      if (attempts >= MAX_QUOTE_ATTEMPTS) return Promise.reject(lastError);
+      var bucketId = pickBucket(seen, attempted);
+      if (bucketId === null) return Promise.reject(lastError);
+
+      attempted[bucketId] = true;
+      attempts++;
+      return fetchBucket(bucketId).then(function (quotes) {
+        return { id: bucketId, quotes: quotes };
+      }).catch(function (error) {
+        if (error.status === 404) return tryNextBucket(error);
+        throw error;
+      });
+    }
+
+    return tryNextBucket();
+  }
+
   function pickUnplayedQuote(quotes, fingerprints) {
     var start = Math.floor(Math.random() * quotes.length);
     for (var i = 0; i < quotes.length; i++) {
@@ -280,9 +303,8 @@
     offlineSyncPromise = loadOfflineState().then(function (state) {
       function fillQueue() {
         if (state.count >= OFFLINE_QUEUE_SIZE) return;
-        var bucketId = Math.floor(Math.random() * N_BUCKETS) + 1;
-        return fetchBucket(bucketId).then(function (quotes) {
-          var quote = pickUnplayedQuote(quotes, state.fingerprints);
+        return fetchRandomBucket([]).then(function (bucket) {
+          var quote = pickUnplayedQuote(bucket.quotes, state.fingerprints);
           if (!quote) return;
           return cacheOfflineQuote(quote, state.fingerprints).then(function (added) {
             if (added) state.count++;
@@ -689,25 +711,11 @@
   function loadOnlineQuote() {
     var now = Date.now();
     var seen = loadSeen(now);
-    var attempted = {};
-
-    function tryNextBucket(lastError) {
-      var bucketId = pickBucket(seen, attempted);
-      if (bucketId === null) return Promise.reject(lastError);
-
-      attempted[bucketId] = true;
-      seen.push({ id: bucketId, ts: now });
+    return fetchRandomBucket(seen).then(function (bucket) {
+      seen.push({ id: bucket.id, ts: now });
       writeCookie(COOKIE_NAME, JSON.stringify(seen));
-
-      return fetchBucket(bucketId).then(function (quotes) {
-        return quotes[Math.floor(Math.random() * quotes.length)];
-      }).catch(function (error) {
-        if (error.status === 404) return tryNextBucket(error);
-        throw error;
-      });
-    }
-
-    return tryNextBucket();
+      return bucket.quotes[Math.floor(Math.random() * bucket.quotes.length)];
+    });
   }
 
   function loadQuote() {
