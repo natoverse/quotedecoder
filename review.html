@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#050d07" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Quote Review — Quote Decoder</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="review.css" />
+</head>
+<body>
+  <main class="review">
+    <header>
+      <a href="./">Back to Quote Decoder</a>
+      <h1>Quote review</h1>
+      <p>Review 100 quotes per page, filter by tag, and select quotes for removal.
+        Selections stay checked across pages and filters until you reload or clear them.</p>
+      <p>“Remove quotes” opens a prefilled GitHub issue for you to submit; it does not delete quotes.</p>
+    </header>
+    <noscript><p>Enable JavaScript to review quotes.</p></noscript>
+    <p id="review-status" role="status" aria-live="polite">Loading quotes…</p>
+    <button id="review-retry" type="button" hidden>Retry loading quotes</button>
+    <section id="review-controls" aria-label="Review controls" hidden>
+      <div class="review-toolbar">
+        <label for="review-tag">Tag</label>
+        <select id="review-tag">
+          <option value="">All tags</option>
+        </select>
+        <label><input id="review-selected-only" type="checkbox" /> Selected only</label>
+      </div>
+      <div class="review-toolbar">
+        <label><input id="review-select-page" type="checkbox" /> Select this page</label>
+        <span id="review-selection-count" role="status" aria-live="polite">0 selected</span>
+        <button id="review-clear" type="button" disabled>Clear selection</button>
+        <a id="review-remove" class="review-action" target="_blank" rel="noopener noreferrer" hidden>Remove quotes (opens GitHub)</a>
+      </div>
+      <div id="review-issue-fallback" hidden>
+        <p id="review-issue-help"></p>
+        <label for="review-issue-body">Issue body (select all and copy)</label>
+        <textarea id="review-issue-body" rows="8" readonly></textarea>
+      </div>
+      <nav class="review-toolbar" aria-label="Quote pages">
+        <button class="review-previous" type="button">Previous</button>
+        <label for="review-page">Page</label>
+        <input id="review-page" type="number" min="1" value="1" />
+        <span id="review-page-count"></span>
+        <button class="review-next" type="button">Next</button>
+      </nav>
+      <p id="review-results" role="status" aria-live="polite"></p>
+    </section>
+    <ul id="review-quotes" class="review-quotes" aria-label="Quotes"></ul>
+    <nav id="review-bottom-pages" class="review-toolbar" aria-label="Quote pages (bottom)" hidden>
+      <button class="review-previous" type="button">Previous</button>
+      <span id="review-bottom-page-count"></span>
+      <button class="review-next" type="button">Next</button>
+    </nav>
+  </main>
+  <script src="review.js"></script>
+</body>
+</html>

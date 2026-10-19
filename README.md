@@ -29,6 +29,21 @@ them silently in the background. A service worker caches the app shell, so the
 site and its refresh button continue to work without a network connection after
 the first online visit.
 
+### Quote review
+
+Open `review.html` directly (for example, `/quotedecoder/review.html` on GitHub
+Pages). This route is intentionally unlinked from the game and marked `noindex`;
+it is not private or access-controlled.
+
+The review page loads the quote buckets once, displays 100 quotes per page with
+authors and tags, and lets you filter by tag. Checkbox selections survive page
+and filter changes, but not a reload. Use “Selected only” to check your batch,
+then “Remove quotes” to open a prefilled GitHub issue using the same quote
+numbers as the game. Submit the issue on GitHub to request removal; the page
+does not change the dataset. Large batches provide an issue body to copy and
+paste instead of exceeding URL limits. Reviewing requires a network connection
+and initially downloads the full catalog (about 14 MB).
+
 ## Scripts
 
 `scripts/` regenerates the data from the tagged master:
