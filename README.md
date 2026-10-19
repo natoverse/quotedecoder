@@ -17,33 +17,41 @@ Quotes live in `quotes/`, served straight from GitHub (no backend/query layer):
 
 Each quote is `{ "quote", "author", "tags": [...] }`.
 
-### Removing quote files
+### Removing a quote by number
 
-The app tolerates deleted files in `quotes/all/`: on HTTP 404 it picks a different,
-untried bucket, up to **five requests total** (the first request plus four retries)
-per quote load. If all five are missing and no offline quote is available, it
-shows the existing "Please try again" error. Other errors are not retried.
-Background offline refills use the same limit and stop silently on failure.
+Individual quotes can be removed from `quotes/all/` by replacing their array
+entry with `null`. The slot remains reserved for that quote number; the bucket
+file and its other quotes remain available.
 
-To remove a bucket:
+To remove a reported quote number `n`:
 
-1. Find its file in `quotes/all/`. For a reported quote number `n`, the bucket ID is
-   `((n - 1) % 100) + 1`, and its zero-based array index is `Math.floor((n - 1) / 100)`.
-2. Delete that bucket's JSON file. Keep the remaining filenames and the app's
-   bucket count unchanged so existing quote numbers stay stable.
-3. Deploy, confirm the deleted URL returns 404, and check that a fresh browser
-   session can still load and refresh puzzles.
+1. Find the bucket ID using `((n - 1) % 100) + 1` and the zero-based array index
+   using `Math.floor((n - 1) / 100)`.
+2. In `quotes/all/<bucket ID>.json`, replace the entire quote object at that index
+   with `null`. Do **not** delete the array entry, compact the array, or delete the
+   bucket file: doing so would renumber later quotes or remove unrelated quotes.
+3. Validate the edited JSON with `python3 -m json.tool`, run the quote-loading
+   checks below, and deploy.
 
-**A bucket contains hundreds of quotes, not just one.** Deleting it removes all
-of those quotes from new app fetches; this is not a single-quote deletion strategy.
-Deleting an array element instead would renumber later quotes in that bucket.
+For example, removing quote #101 means replacing index 1 in `quotes/all/1.json`
+with `null`; quote #201 stays at index 2 with its number unchanged.
+
+When a randomly requested quote number has a `null` slot, the app treats that
+number as not found **even when its bucket fetch returned HTTP 200**. It selects
+another random number from an untried bucket, up to **five selections total**
+(the first selection plus four retries). If all five fail and no offline quote
+is available, it shows the existing "Please try again" error. Missing bucket
+files also consume an attempt; other fetch/JSON errors are not retried.
+Background offline refills use the same quote-number check and retry limit,
+never enqueue removed slots, and stop silently on failure.
+
 The tagged master and tag-specific files also retain their copies of the quotes.
-Running `scripts/build_all.py` recreates deleted buckets from the master, so any
-intentional file deletions must be reapplied after regeneration.
+Running `scripts/build_all.py` regenerates the buckets from the master, so
+intentional `null` replacements must be reapplied after regeneration.
 
-Already queued offline quotes can still appear until consumed; deleting a server
-file does not invalidate browser storage. No quotes are cached by the service
-worker itself.
+Already queued offline quotes can still appear until consumed; removing a number
+from the server data does not invalidate browser storage. No quotes are cached
+by the service worker itself.
 
 ## Web app
 
@@ -63,3 +71,9 @@ the first online visit.
 
 - `build_all.py` → `quotes/all/`
 - `phase2_invert.py` → `quotes/tagged/` and `quotes/tags.json`
+
+## Validation
+
+Run `node --check app.js` for syntax validation and
+`node --test scripts/quote-loading.test.js` for the quote-loading regression checks.
+The checks use Node's built-in test runner with no additional dependencies.
