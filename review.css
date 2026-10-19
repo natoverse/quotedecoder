@@ -1,0 +1,121 @@
+.review {
+  width: 100%;
+  max-width: 72rem;
+  padding: clamp(1rem, 3vw, 2rem);
+  background: var(--panel);
+  overflow-wrap: anywhere;
+}
+
+.review [hidden] {
+  display: none;
+}
+
+.review h1 {
+  color: var(--accent);
+}
+
+.review a {
+  color: var(--accent);
+}
+
+.review-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 1rem 0;
+}
+
+.review button,
+.review select,
+.review input[type="number"],
+.review textarea,
+.review-action {
+  max-width: 100%;
+  padding: 0.5rem;
+  border: 1px solid var(--line);
+  border-radius: 0.2rem;
+  font: inherit;
+  color: var(--fg);
+  background: var(--control-bg);
+}
+
+.review button,
+.review select,
+.review input[type="checkbox"] {
+  cursor: pointer;
+}
+
+.review input[type="checkbox"] {
+  width: 1.25rem;
+  height: 1.25rem;
+  flex-shrink: 0;
+  accent-color: var(--accent);
+  vertical-align: middle;
+}
+
+.review input[type="number"] {
+  width: 6rem;
+}
+
+.review textarea {
+  display: block;
+  width: 100%;
+}
+
+.review button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.review :focus-visible {
+  outline: 2px solid var(--selected);
+  outline-offset: 3px;
+}
+
+.review-quotes {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.review-quote {
+  border-top: 1px solid var(--line);
+}
+
+.review-quote label {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 1rem 0;
+  cursor: pointer;
+}
+
+.review-quote label > span {
+  min-width: 0;
+}
+
+.review-quote-number,
+.review-quote-text,
+.review-quote-author,
+.review-tags {
+  display: block;
+}
+
+.review-quote-number,
+.review-quote-author {
+  color: var(--muted);
+}
+
+.review-quote-text {
+  margin: 0.4rem 0;
+}
+
+.review-tag {
+  display: inline-block;
+  margin: 0.5rem 0.5rem 0 0;
+  padding: 0.1rem 0.4rem;
+  border: 1px solid var(--line);
+  border-radius: 0.2rem;
+  font-size: 0.85rem;
+}
