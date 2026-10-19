@@ -17,6 +17,34 @@ Quotes live in `quotes/`, served straight from GitHub (no backend/query layer):
 
 Each quote is `{ "quote", "author", "tags": [...] }`.
 
+### Removing quote files
+
+The app tolerates deleted files in `quotes/all/`: on HTTP 404 it picks a different,
+untried bucket, up to **five requests total** (the first request plus four retries)
+per quote load. If all five are missing and no offline quote is available, it
+shows the existing "Please try again" error. Other errors are not retried.
+Background offline refills use the same limit and stop silently on failure.
+
+To remove a bucket:
+
+1. Find its file in `quotes/all/`. For a reported quote number `n`, the bucket ID is
+   `((n - 1) % 100) + 1`, and its zero-based array index is `Math.floor((n - 1) / 100)`.
+2. Delete that bucket's JSON file. Keep the remaining filenames and the app's
+   bucket count unchanged so existing quote numbers stay stable.
+3. Deploy, confirm the deleted URL returns 404, and check that a fresh browser
+   session can still load and refresh puzzles.
+
+**A bucket contains hundreds of quotes, not just one.** Deleting it removes all
+of those quotes from new app fetches; this is not a single-quote deletion strategy.
+Deleting an array element instead would renumber later quotes in that bucket.
+The tagged master and tag-specific files also retain their copies of the quotes.
+Running `scripts/build_all.py` recreates deleted buckets from the master, so any
+intentional file deletions must be reapplied after regeneration.
+
+Already queued offline quotes can still appear until consumed; deleting a server
+file does not invalidate browser storage. No quotes are cached by the service
+worker itself.
+
 ## Web app
 
 `index.html` (with `styles.css` and `app.js`) is a static, mobile-friendly page
