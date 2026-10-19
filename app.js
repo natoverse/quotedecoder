@@ -265,7 +265,7 @@
     });
   }
 
-  function fetchRandomBucket(seen) {
+  function fetchRandomBucket(seen, onAttempt) {
     var attempted = {};
     var attempts = 0;
 
@@ -276,9 +276,8 @@
 
       attempted[bucketId] = true;
       attempts++;
-      return fetchBucket(bucketId).then(function (quotes) {
-        return { id: bucketId, quotes: quotes };
-      }).catch(function (error) {
+      if (onAttempt) onAttempt(bucketId);
+      return fetchBucket(bucketId).catch(function (error) {
         if (error.status === 404) return tryNextBucket(error);
         throw error;
       });
@@ -303,8 +302,8 @@
     offlineSyncPromise = loadOfflineState().then(function (state) {
       function fillQueue() {
         if (state.count >= OFFLINE_QUEUE_SIZE) return;
-        return fetchRandomBucket([]).then(function (bucket) {
-          var quote = pickUnplayedQuote(bucket.quotes, state.fingerprints);
+        return fetchRandomBucket([]).then(function (quotes) {
+          var quote = pickUnplayedQuote(quotes, state.fingerprints);
           if (!quote) return;
           return cacheOfflineQuote(quote, state.fingerprints).then(function (added) {
             if (added) state.count++;
@@ -711,10 +710,11 @@
   function loadOnlineQuote() {
     var now = Date.now();
     var seen = loadSeen(now);
-    return fetchRandomBucket(seen).then(function (bucket) {
-      seen.push({ id: bucket.id, ts: now });
+    return fetchRandomBucket(seen, function (bucketId) {
+      seen.push({ id: bucketId, ts: now });
       writeCookie(COOKIE_NAME, JSON.stringify(seen));
-      return bucket.quotes[Math.floor(Math.random() * bucket.quotes.length)];
+    }).then(function (quotes) {
+      return quotes[Math.floor(Math.random() * quotes.length)];
     });
   }
 
