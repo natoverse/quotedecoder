@@ -855,10 +855,14 @@
     }
     if (currentQuote && typeof currentQuote.number === "number") {
       var issueTitle = "Remove quote #" + currentQuote.number;
-      var issueBody = "Current quote number: " + currentQuote.number;
+      var removalRequest = JSON.stringify({
+        number: currentQuote.number,
+        quote: currentQuote.quote,
+        author: currentQuote.author
+      }, null, 2);
       removeCurrentQuoteEl.href = NEW_ISSUE_URL +
-        "?title=" + encodeURIComponent(issueTitle) +
-        "&body=" + encodeURIComponent(issueBody);
+        "?template=remove-quote.yml&title=" + encodeURIComponent(issueTitle) +
+        "&request=" + encodeURIComponent(removalRequest);
       removeCurrentQuoteEl.hidden = false;
     } else {
       removeCurrentQuoteEl.removeAttribute("href");

@@ -160,6 +160,48 @@ test("loads an existing quote on the first selection", async () => {
   assert.equal(app.number(), 1);
 });
 
+test("removal form includes the exact numbered quote identity", async () => {
+  const original = {
+    quote: 'A "quote" with & # + % ? ``` and\nanother line — 雪',
+    author: 'An "author" & co.',
+    tags: []
+  };
+  const app = startApp({ respond: () => response([original]) });
+  await waitFor(() => loaded(app));
+  app.get("settings-btn").events.click();
+  const url = new URL(app.get("remove-current-quote").href);
+  assert.equal(url.origin, "https://github.com");
+  assert.equal(url.pathname, "/natoverse/quotedecoder/issues/new");
+  assert.equal(url.searchParams.get("template"), "remove-quote.yml");
+  assert.equal(url.searchParams.get("title"), "Remove quote #1");
+  assert.deepEqual(JSON.parse(url.searchParams.get("request")), {
+    number: 1,
+    quote: original.quote,
+    author: original.author
+  });
+  assert.equal(url.hash, "");
+  assert.equal(url.searchParams.has("body"), false);
+});
+
+test("offline quotes report their own stored identity in removal issues", async () => {
+  const original = { ...quote("Stored offline quote"), number: 12345 };
+  const offline = offlineDatabase([original]);
+  const app = startApp({
+    offline,
+    online: false,
+    respond: () => { throw new Error("Unexpected fetch"); }
+  });
+  await waitFor(() => loaded(app));
+  app.get("settings-btn").events.click();
+  const url = new URL(app.get("remove-current-quote").href);
+  assert.deepEqual(JSON.parse(url.searchParams.get("request")), {
+    number: 12345,
+    quote: original.quote,
+    author: original.author
+  });
+  assert.deepEqual(app.requests, []);
+});
+
 test("a requested null slot in an HTTP 200 bucket retries a different quote number", async () => {
   const app = startApp({
     respond: id => response(id === 1 ? [null, quote("Unrelated sibling")] : [quote()])

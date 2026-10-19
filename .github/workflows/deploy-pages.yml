@@ -1,6 +1,7 @@
 name: Deploy web app to GitHub Pages
 
 on:
+  pull_request:
   push:
     branches:
       - main
@@ -8,16 +9,53 @@ on:
 
 permissions:
   contents: read
-  pages: write
-  id-token: write
 
 concurrency:
-  group: pages
+  group: pages-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 jobs:
-  deploy:
+  validate:
     runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check app syntax and quote loading
+        run: |
+          node --check app.js
+          node --test scripts/quote-loading.test.js
+
+      - name: Test verified removals and regeneration
+        run: python3 -m unittest discover -s scripts -p 'test_quote_removals.py'
+
+      - name: Validate published data and unchanged quote numbers
+        env:
+          BASE_REF: ${{ github.event.pull_request.base.sha || github.event.before }}
+        run: |
+          if [ -n "$BASE_REF" ] && [ "$BASE_REF" != "0000000000000000000000000000000000000000" ]; then
+            python3 scripts/validate_removals.py --base-ref "$BASE_REF"
+          else
+            python3 scripts/validate_removals.py
+          fi
+
+      - name: Ensure regeneration preserves committed removals
+        run: |
+          python3 scripts/build_all.py
+          python3 scripts/phase2_invert.py
+          git diff --exit-code -- quotes
+          test -z "$(git ls-files --others --exclude-standard -- quotes)"
+
+  deploy:
+    if: github.event_name != 'pull_request'
+    needs: validate
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
